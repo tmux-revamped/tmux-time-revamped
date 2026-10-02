@@ -87,6 +87,7 @@ run-shell ~/.tmux/plugins/tmux-time-revamped/time-revamped.tmux
 | `@time_revamped_night_color` | `#[fg=blue]` | color for hours 22 to 05 |
 | `@time_revamped_weekend_color` | `#[fg=brightblack]` | color used on Saturday and Sunday, overriding the hour |
 | `@time_revamped_{sunrise,morning,day,afternoon,sunset,evening,night,weekend}_icon` | empty | optional glyph shown before the time, for example a Nerd Font sun or moon |
+| `@time_revamped_icon_position` | `middle` | where the time-of-day icon sits in each entry: `middle` gives `NYC <icon> 18:00`, `before` gives `<icon> NYC 18:00` |
 | `@time_revamped_reset` | `#[default]` | the style reset after each entry; set `#[fg=default]` to keep a surrounding theme's background, or empty for none |
 | `@time_revamped_relative_day` | `0` | set to `1` to append a `+1d`/`-1d` badge when a world clock falls on a different calendar day than the local one |
 | `@time_revamped_work_hours` | `0` | set to `1` to dim any world clock that is outside working hours |

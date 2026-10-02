@@ -96,6 +96,14 @@ time_render_period_icon() {
   get_tmux_option "@time_revamped_${period}_icon" ""
 }
 
+time_render_entry() {
+  if [[ "$(get_tmux_option "@time_revamped_icon_position" "middle")" == "before" ]]; then
+    echo "${1}${3} ${2} ${4}${5}"
+  else
+    echo "${1}${2} ${3} ${4}${5}"
+  fi
+}
+
 # time_render_zone_full ABBR TIME HOUR WEEKEND -> "<color><abbr> [icon ]<time><reset>".
 time_render_zone_full() {
   local abbr="${1}" tm="${2}" color icon reset
@@ -103,7 +111,7 @@ time_render_zone_full() {
   icon=$(time_render_period_icon "${3}" "${4}")
   reset=$(_time_reset)
   if [[ -n "${icon}" ]]; then
-    echo "${color}${abbr} ${icon} ${tm}${reset}"
+    time_render_entry "${color}" "${abbr}" "${icon}" "${tm}" "${reset}"
   else
     echo "${color}${abbr} ${tm}${reset}"
   fi
@@ -116,7 +124,7 @@ time_render_zone_compact() {
   icon=$(time_render_period_icon "${3}" "${4}")
   reset=$(_time_reset)
   if [[ -n "${icon}" ]]; then
-    echo "${color}${label} ${icon} ${tm}${reset}"
+    time_render_entry "${color}" "${label}" "${icon}" "${tm}" "${reset}"
   else
     echo "${color}${label} ${tm}${reset}"
   fi
@@ -130,5 +138,6 @@ export -f _time_icon_period
 export -f _time_default_color
 export -f time_render_period_color
 export -f time_render_period_icon
+export -f time_render_entry
 export -f time_render_zone_full
 export -f time_render_zone_compact

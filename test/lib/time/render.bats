@@ -130,3 +130,17 @@ teardown() {
   [[ "$(time_render_zone_compact NY 19:30 19 0)" == "#[fg=magenta]NY 19:30#[fg=default]" ]]
   [[ "$(time_render_zone_full EST 09:30 9 0)" == *"#[fg=default]" ]]
 }
+
+@test "render.sh - the icon sits between label and time by default" {
+  run time_render_entry "" "NYC" "I" "18:00" ""
+
+  [[ "${output}" == "NYC I 18:00" ]]
+}
+
+@test "render.sh - the icon can lead the entry" {
+  set_tmux_option "@time_revamped_icon_position" "before"
+
+  run time_render_entry "<c>" "NYC" "I" "18:00" "<r>"
+
+  [[ "${output}" == "<c>I NYC 18:00<r>" ]]
+}
