@@ -18,6 +18,10 @@ source "${PLUGIN_DIR}/src/lib/utils/has-command.sh"
 # shellcheck source=/dev/null
 source "${PLUGIN_DIR}/src/lib/utils/cache.sh"
 # shellcheck source=/dev/null
+source "${PLUGIN_DIR}/src/lib/utils/publish.sh"
+# shellcheck source=/dev/null
+source "${PLUGIN_DIR}/src/lib/utils/ticker.sh"
+# shellcheck source=/dev/null
 source "${PLUGIN_DIR}/src/lib/time/time.sh"
 # shellcheck source=/dev/null
 source "${PLUGIN_DIR}/src/lib/time/render.sh"
@@ -161,8 +165,26 @@ read_local() {
   time_render_zone_compact "${label}" "${tm}" "${hour}" "${weekend}"
 }
 
+time_publish() {
+  local metric
+  for metric in $(get_tmux_option "@time_revamped_published" ""); do
+    publish_add "@time_revamped_out_${metric}" "$(main "${metric}")"
+  done
+  publish_commit
+}
+
+_time_reexec() { exec "${PLUGIN_DIR}/src/time.sh" daemon; }
+
+time_daemon() {
+  if ticker_run time_revamped time_publish "$$"; then
+    _time_reexec
+  fi
+}
+
 main() {
   case "${1:-}" in
+    start)    ticker_start "${PLUGIN_DIR}/src/time.sh" ;;
+    daemon)   time_daemon ;;
     datetime) read_datetime ;;
     date)     read_date ;;
     clock)    read_clock ;;

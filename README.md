@@ -113,6 +113,14 @@ Icons use seven hour buckets, finer than the five color buckets, so a dawn glyph
 
 Both full and compact entries show the period icon when one is configured. Full mode shows the timezone abbreviation, then the icon, then the time. Compact mode replaces the abbreviation with short city initials, for example `NY` for `America/New_York`. When nesting the world clocks inside a themed status module such as Catppuccin, set `@time_revamped_reset '#[fg=default]'` so the theme's background is kept around each entry.
 
+### Render mode
+
+By default each placeholder becomes a `#()` call, and tmux runs it on every status redraw, which can be about once a second when several plugins share the bar. Set `@time_revamped_render` to `options` and each placeholder becomes a read of a tmux option instead, such as `#{E:@time_revamped_out_local}`. One background process per server renders every clock the status line uses every `status-interval` seconds, writes them in a single tmux call, and redraws once, so the clocks change together and never render empty. The process exits after its current tick when the server stops, and a config reload replaces it.
+
+```tmux
+set -g @time_revamped_render 'options'
+```
+
 ### The local place label
 
 `#{time_local}` shows where you are. The default `timezone` source reads the system timezone city offline, which updates whenever you cross into a new zone. The `geoip` source reports the actual city from your public IP, so it distinguishes cities that share a zone and tracks travel everywhere. The geoip request is opt-in, runs in a background worker on the `@time_revamped_geoip_interval`, and never blocks the status line; it caches the last city and falls back to the timezone city when offline. It needs `curl` and sends your IP to the configured endpoint, so enable it only when that is acceptable.

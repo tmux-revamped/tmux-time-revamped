@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `@time_revamped_render 'options'` replaces the `#()` calls with tmux option
+  reads, written by one background process per server every
+  `status-interval` seconds. tmux reruns a `#()` call on every redraw, so a
+  shared bar ran each clock about once a second and painted them one by one.
 - `@time_revamped_icon_position`. Set to `before`, each clock leads with its
   time-of-day icon, then the place and the time.
 

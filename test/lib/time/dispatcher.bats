@@ -266,3 +266,49 @@ teardown() {
   run main zones
   [[ "${output}" == "#[bold]"* ]]
 }
+
+@test "time dispatcher - publish writes every published metric in one batch" {
+  export PUBLISH_LOG="${TEST_TMPDIR}/publish.log"
+  _publish_tmux() { [[ "${1}" == "list-clients" ]] && return 0; printf '%s\n' "$@" > "${PUBLISH_LOG}"; }
+  read_epoch() { printf '1700000000'; }
+  read_week() { printf 'W46'; }
+  set_tmux_option "@time_revamped_published" "epoch week"
+
+  time_publish
+
+  [[ "$(paste -sd'|' "${PUBLISH_LOG}")" == "set-option|-gq|@time_revamped_out_epoch|1700000000|;|set-option|-gq|@time_revamped_out_week|W46" ]]
+}
+
+@test "time dispatcher - the daemon re-executes after the tick limit" {
+  ticker_run() { return 0; }
+  _time_reexec() { echo "reexec" > "${TEST_TMPDIR}/reexec"; }
+
+  time_daemon
+
+  [[ "$(cat "${TEST_TMPDIR}/reexec")" == "reexec" ]]
+}
+
+@test "time dispatcher - the daemon stops when it loses ownership" {
+  ticker_run() { return 1; }
+  _time_reexec() { echo "reexec" > "${TEST_TMPDIR}/reexec"; }
+
+  time_daemon
+
+  [ ! -f "${TEST_TMPDIR}/reexec" ]
+}
+
+@test "time dispatcher - main daemon runs the ticker" {
+  time_daemon() { echo "daemon" > "${TEST_TMPDIR}/daemon"; }
+
+  main daemon
+
+  [[ "$(cat "${TEST_TMPDIR}/daemon")" == "daemon" ]]
+}
+
+@test "time dispatcher - main start spawns the daemon" {
+  _ticker_spawn() { printf '%s' "${1}" > "${TEST_TMPDIR}/spawn"; }
+
+  main start
+
+  [[ "$(cat "${TEST_TMPDIR}/spawn")" == *"/src/time.sh" ]]
+}
