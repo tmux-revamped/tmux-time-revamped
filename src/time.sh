@@ -176,7 +176,7 @@ time_publish() {
 _time_reexec() { exec "${PLUGIN_DIR}/src/time.sh" daemon; }
 
 time_daemon() {
-  if ticker_run time_revamped time_publish "$$"; then
+  if ticker_run time_revamped time_publish "$$" minute; then
     _time_reexec
   fi
 }

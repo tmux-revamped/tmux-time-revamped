@@ -10,11 +10,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `@time_revamped_render 'options'` replaces the `#()` calls with tmux option
-  reads, written by one background process per server every
-  `status-interval` seconds. tmux reruns a `#()` call on every redraw, so a
+  reads, written by one background process per server once a minute, just after the minute changes. tmux reruns a `#()` call on every redraw, so a
   shared bar ran each clock about once a second and painted them one by one.
 - `@time_revamped_icon_position`. Set to `before`, each clock leads with its
   time-of-day icon, then the place and the time.
+
+### Changed
+
+- The options-mode background process reads every option it needs in one tmux
+  call per tick, sends its cache writes and published values in a second, and
+  keeps its functions out of the environment of the commands it runs. Options
+  mode wakes once a minute, one second after the minute changes, instead of
+  every few seconds.
 
 ## [1.2.0] - 2026-06-30
 

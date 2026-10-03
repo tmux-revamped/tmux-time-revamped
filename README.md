@@ -115,7 +115,7 @@ Both full and compact entries show the period icon when one is configured. Full 
 
 ### Render mode
 
-By default each placeholder becomes a `#()` call, and tmux runs it on every status redraw, which can be about once a second when several plugins share the bar. Set `@time_revamped_render` to `options` and each placeholder becomes a read of a tmux option instead, such as `#{E:@time_revamped_out_local}`. One background process per server renders every clock the status line uses every `status-interval` seconds, writes them in a single tmux call, and redraws once, so the clocks change together and never render empty. The process exits after its current tick when the server stops, and a config reload replaces it.
+By default each placeholder becomes a `#()` call, and tmux runs it on every status redraw, which can be about once a second when several plugins share the bar. Set `@time_revamped_render` to `options` and each placeholder becomes a read of a tmux option instead, such as `#{E:@time_revamped_out_local}`. One background process per server renders every clock the status line uses once a minute, just after the minute changes, writes them in a single tmux call, and redraws once, so the clocks change together and never render empty. The process exits after its current tick when the server stops, and a config reload replaces it.
 
 ```tmux
 set -g @time_revamped_render 'options'
