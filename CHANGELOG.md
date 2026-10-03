@@ -23,6 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   mode wakes once a minute, one second after the minute changes, instead of
   every few seconds.
 
+### Fixed
+
+- In options mode, running the entry point a second time, as two overlapping
+  config reloads do, found no placeholders left in the status line and
+  published nothing, which froze every value. A metric whose option read is
+  already on the status line now counts as used.
+
 ## [1.2.0] - 2026-06-30
 
 ### Added

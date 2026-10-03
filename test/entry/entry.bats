@@ -56,3 +56,12 @@ teardown() {
 
   [[ "$(cat "$(_mock_opt_file @time_revamped_published)")" == "local" ]]
 }
+
+@test "entry - a second run keeps metrics already turned into option reads" {
+  tmux set-option -gq "@time_revamped_render" "options"
+  tmux set-option -gq "status-right" "[#{E:@time_revamped_out_local}]"
+
+  bash "${ENTRY}"
+
+  [[ "$(cat "$(_mock_opt_file @time_revamped_published)")" == "local" ]]
+}
