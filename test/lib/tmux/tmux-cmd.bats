@@ -107,3 +107,20 @@ teardown() {
   grep -q "time-revamped" "${CAP}"
   grep -q "/plugin/src/time.sh toggle-format" "${CAP}"
 }
+
+@test "tmux-cmd.sh - time_menu quotes a plugin path with a space and a quote" {
+  # Arrange
+  export TIME_DISPATCH="/p a/it's/time.sh"
+  _tmux() { printf '%s\n' "$@" > "${CAP}"; }
+  local expected
+  expected="$(cat <<'EXPECTED'
+run-shell "/p\\ a/it\\'s/time.sh copy iso"
+EXPECTED
+)"
+
+  # Act
+  time_menu
+
+  # Assert
+  grep -Fqx -- "${expected}" "${CAP}"
+}

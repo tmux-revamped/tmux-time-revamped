@@ -57,15 +57,23 @@ time_calendar_popup() {
   _tmux display-popup -E "bash -c ${quoted}"
 }
 
+_time_menu_cmd() {
+  local cmd hash="#" bs='\' dq='"' dl='$' ebs='\\' edq='\"' edl='\$'
+  cmd="$(printf '%q %s' "${TIME_DISPATCH:-}" "${1}")"
+  cmd="${cmd//"${hash}"/${hash}${hash}}"
+  cmd="${cmd//"${bs}"/${ebs}}"
+  cmd="${cmd//"${dq}"/${edq}}"
+  printf '%s' "${cmd//"${dl}"/${edl}}"
+}
+
 time_menu() {
-  local cmd="${TIME_DISPATCH:-}"
   _tmux display-menu -T "time-revamped" \
-    "Toggle 12/24h" h "run-shell \"${cmd} toggle-format\"" \
-    "Calendar"      c "run-shell \"${cmd} calendar\"" \
-    "Copy ISO"      i "run-shell \"${cmd} copy iso\"" \
-    "Copy epoch"    e "run-shell \"${cmd} copy epoch\"" \
-    "Set mark"      m "run-shell \"${cmd} mark\"" \
-    "Doctor"        d "run-shell \"${cmd} doctor\""
+    "Toggle 12/24h" h "run-shell \"$(_time_menu_cmd toggle-format)\"" \
+    "Calendar"      c "run-shell \"$(_time_menu_cmd calendar)\"" \
+    "Copy ISO"      i "run-shell \"$(_time_menu_cmd 'copy iso')\"" \
+    "Copy epoch"    e "run-shell \"$(_time_menu_cmd 'copy epoch')\"" \
+    "Set mark"      m "run-shell \"$(_time_menu_cmd mark)\"" \
+    "Doctor"        d "run-shell \"$(_time_menu_cmd doctor)\""
 }
 
 export -f _tmux
@@ -74,4 +82,5 @@ export -f time_set_mark
 export -f time_copy_timestamp
 export -f time_toggle_format
 export -f time_calendar_popup
+export -f _time_menu_cmd
 export -f time_menu
