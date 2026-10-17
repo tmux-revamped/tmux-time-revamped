@@ -112,3 +112,31 @@ record_bind_keys() {
   # Assert
   [[ "$(cat "${BIND_LOG}")" != *"calendar"* ]]
 }
+
+@test "entry - jobs mode quotes a plugin path with a space, a quote and a hash" {
+  # Arrange
+  local dir="${TEST_TMPDIR}/it's #x dir"
+  mkdir -p "${dir}"
+  cp -f "${ENTRY}" "${dir}/time-revamped.tmux"
+  tmux set-option -gq "status-right" "[#{time_iso}]"
+
+  # Act
+  bash "${dir}/time-revamped.tmux"
+
+  # Assert
+  [[ "$(cat "$(_mock_opt_file status-right)")" == "[#($(cd "${TEST_TMPDIR}" && pwd)/it\\'s\\ ##x\\ dir/src/time.sh iso)]" ]]
+}
+
+@test "entry - the menu key quotes a plugin path with a space, a quote and a hash" {
+  # Arrange
+  record_bind_keys
+  local dir="${TEST_TMPDIR}/it's #x dir"
+  mkdir -p "${dir}"
+  cp -f "${ENTRY}" "${dir}/time-revamped.tmux"
+
+  # Act
+  bash "${dir}/time-revamped.tmux"
+
+  # Assert
+  [[ "$(cat "${BIND_LOG}")" == "bind-key M-t run-shell $(cd "${TEST_TMPDIR}" && pwd)/it\\'s\\ ##x\\ dir/src/time.sh menu" ]]
+}

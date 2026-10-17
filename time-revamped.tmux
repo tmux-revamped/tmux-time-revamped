@@ -7,6 +7,9 @@
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TIME_CMD="${PLUGIN_DIR}/src/time.sh"
+HASH="#"
+TIME_CMD_QUOTED="$(printf '%q' "${TIME_CMD}")"
+TIME_CMD_QUOTED="${TIME_CMD_QUOTED//"${HASH}"/${HASH}${HASH}}"
 
 placeholders=(
   "\#{time}"
@@ -26,20 +29,20 @@ placeholders=(
 )
 
 commands=(
-  "#(${TIME_CMD} datetime)"
-  "#(${TIME_CMD} date)"
-  "#(${TIME_CMD} clock)"
-  "#(${TIME_CMD} zones)"
-  "#(${TIME_CMD} local)"
-  "#(${TIME_CMD} until)"
-  "#(${TIME_CMD} elapsed)"
-  "#(${TIME_CMD} epoch)"
-  "#(${TIME_CMD} iso)"
-  "#(${TIME_CMD} offset)"
-  "#(${TIME_CMD} week)"
-  "#(${TIME_CMD} doy)"
-  "#(${TIME_CMD} dst)"
-  "#(${TIME_CMD} overlap)"
+  "#(${TIME_CMD_QUOTED} datetime)"
+  "#(${TIME_CMD_QUOTED} date)"
+  "#(${TIME_CMD_QUOTED} clock)"
+  "#(${TIME_CMD_QUOTED} zones)"
+  "#(${TIME_CMD_QUOTED} local)"
+  "#(${TIME_CMD_QUOTED} until)"
+  "#(${TIME_CMD_QUOTED} elapsed)"
+  "#(${TIME_CMD_QUOTED} epoch)"
+  "#(${TIME_CMD_QUOTED} iso)"
+  "#(${TIME_CMD_QUOTED} offset)"
+  "#(${TIME_CMD_QUOTED} week)"
+  "#(${TIME_CMD_QUOTED} doy)"
+  "#(${TIME_CMD_QUOTED} dst)"
+  "#(${TIME_CMD_QUOTED} overlap)"
 )
 
 render_mode="$(tmux show-option -gqv "@time_revamped_render")"
@@ -56,10 +59,17 @@ target_for() {
 }
 
 interpolate() {
-  local value="${1}"
-  local i
+  local value="${1}" i placeholder replacement out rest
   for (( i = 0; i < ${#placeholders[@]}; i++ )); do
-    value="${value//${placeholders[i]}/$(target_for "${commands[i]}")}"
+    placeholder="${placeholders[i]#\\}"
+    replacement="$(target_for "${commands[i]}")"
+    out=""
+    rest="${value}"
+    while [[ "${rest}" == *"${placeholder}"* ]]; do
+      out="${out}${rest%%"${placeholder}"*}${replacement}"
+      rest="${rest#*"${placeholder}"}"
+    done
+    value="${out}${rest}"
   done
   echo "${value}"
 }
@@ -90,7 +100,7 @@ bind_key() {
   key=$(tmux show-option -gqv "${opt}")
   [[ -z "${key}" ]] && key="${default}"
   [[ "${key}" == "off" ]] && return 0
-  tmux bind-key "${key}" run-shell "${TIME_CMD} ${subcmd}"
+  tmux bind-key "${key}" run-shell "${TIME_CMD_QUOTED} ${subcmd}"
 }
 
 chmod +x "${TIME_CMD}" 2>/dev/null || true
