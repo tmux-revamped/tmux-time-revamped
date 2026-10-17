@@ -68,7 +68,9 @@ time_toggle_format() {
 # time_calendar_popup -> show the current month's calendar in a popup. Gated on
 # tmux 3.2+ by the caller; the body is a single display-popup.
 time_calendar_popup() {
-  _tmux display-popup -E "cal; echo; read -rsn1 -p 'press any key to close'"
+  local script="cal; echo; read -rsn1 -p 'press any key to close'" quoted
+  printf -v quoted '%q' "${script}"
+  _tmux display-popup -E "bash -c ${quoted}"
 }
 
 # time_menu -> the prefix menu of time actions. Each entry runs back through the

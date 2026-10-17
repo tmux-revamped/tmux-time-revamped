@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The calendar popup ran its `read -rsn1 -p` under tmux's default shell, which
+  zsh and dash reject, so with either as the default shell the popup closed at
+  once or printed an error. The popup now runs its script with bash.
 - With `@time_revamped_local_source 'geoip'`, the city from the network
   response reached the status line unfiltered except for `<`, `>` and `{`, so
   a response holding `#(...)` ran a command through tmux. A city is now

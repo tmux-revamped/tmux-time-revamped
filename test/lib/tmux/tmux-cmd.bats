@@ -86,6 +86,19 @@ teardown() {
   grep -q "cal" "${CAP}"
 }
 
+@test "tmux-cmd.sh - the calendar popup hands its script to bash whatever the default shell" {
+  # Arrange
+  _tmux() { printf '%s' "${!#}" > "${CAP}"; }
+  local expected="cal; echo; read -rsn1 -p 'press any key to close'"
+
+  # Act
+  time_calendar_popup
+
+  # Assert
+  [[ "$(cat "${CAP}")" == "bash -c "* ]] || false
+  [[ "$(sh -c "printf '%s' $(sed 's/^bash -c //' "${CAP}")")" == "${expected}" ]]
+}
+
 @test "tmux-cmd.sh - time_menu builds a menu that calls back into the dispatcher" {
   export TIME_DISPATCH="/plugin/src/time.sh"
   _tmux() { printf '%s\n' "$*" > "${CAP}"; }
