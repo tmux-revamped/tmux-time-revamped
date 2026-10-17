@@ -110,6 +110,15 @@ run-shell ~/.tmux/plugins/tmux-time-revamped/time-revamped.tmux
 | `@time_revamped_copy_key` | `off` | optional prefix key that copies the ISO timestamp |
 | `@time_revamped_mark_key` | `off` | optional prefix key that sets the stopwatch mark |
 
+### Internal state
+
+The plugin manages these options itself. Do not set them.
+
+| Option | Holds |
+|--------|-------|
+| `@time_revamped_mark_epoch` | the Unix epoch of the last stopwatch mark, which `#{time_elapsed}` counts from |
+| `@time_revamped_published` | space-separated clocks the status line uses, set at load so the options-mode renderer publishes only those |
+
 Icons use seven hour buckets, finer than the five color buckets, so a dawn glyph (`sunrise`, hours 05 to 08) and a dusk glyph (`sunset`, hours 18 to 20) can be set independently. Every icon option defaults to empty, so no Nerd Font is required unless you choose to configure one.
 
 Both full and compact entries show the period icon when one is configured. Full mode shows the timezone abbreviation, then the icon, then the time. Compact mode replaces the abbreviation with short city initials, for example `NY` for `America/New_York`. When nesting the world clocks inside a themed status module such as Catppuccin, set `@time_revamped_reset '#[fg=default]'` so the theme's background is kept around each entry.
