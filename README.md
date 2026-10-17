@@ -93,6 +93,7 @@ run-shell ~/.tmux/plugins/tmux-time-revamped/time-revamped.tmux
 | `@time_revamped_work_hours` | `0` | set to `1` to dim any world clock that is outside working hours |
 | `@time_revamped_work_start` | `9` | first working hour, inclusive; also the start of the overlap window |
 | `@time_revamped_work_end` | `17` | last working hour, exclusive; also the end of the overlap window |
+| `@time_revamped_interval` | `minute` | how often options mode renders, with `@time_revamped_render 'options'`: `minute` ticks one second after each minute changes, a whole number ticks every that many seconds, and any other value falls back to `status-interval`, then to 5 seconds |
 | `@time_revamped_dim_style` | `#[dim]` | the style applied to a zone outside working hours; set `none` to disable |
 | `@time_revamped_primary` | empty | zero-based index of the world clock to highlight |
 | `@time_revamped_primary_style` | `#[bold]` | the style applied to the primary zone; set `none` to disable |
