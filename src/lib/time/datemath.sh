@@ -1,21 +1,10 @@
 #!/usr/bin/env bash
-#
-# datemath.sh: portable, pure date arithmetic.
-#
-# Every function here is pure shell integer math except the single _now_epoch
-# seam, which tests override. No date arithmetic flags are used, so the math is
-# identical on BSD (macOS) and GNU date: civil dates convert to a day count with
-# Howard Hinnant's algorithm, never with `date -d` or `date -v`. This keeps
-# countdowns and durations deterministic and clock-pinnable under test.
 
 [[ -n "${_TIME_REVAMPED_DATEMATH_LOADED:-}" ]] && return 0
 _TIME_REVAMPED_DATEMATH_LOADED=1
 
-# Host-probe seam: the current unix epoch. Tests override this.
 _now_epoch() { date +%s 2>/dev/null || echo 0; }
 
-# days_from_civil Y M D -> days since 1970-01-01 (may be negative before then).
-# Pure integer math, valid for the proleptic Gregorian calendar.
 days_from_civil() {
   local y="${1:-1970}" m="${2:-1}" d="${3:-1}"
   y=$(( 10#${y} )); m=$(( 10#${m} )); d=$(( 10#${d} ))
@@ -29,9 +18,6 @@ days_from_civil() {
   echo $(( era * 146097 + doe - 719468 ))
 }
 
-# parse_to_epoch "YYYY-MM-DD[ HH:MM[:SS]]" -> the epoch (seconds) for that civil
-# datetime, with date and time read in the same naive frame. T or space may join
-# date and time. Empty output on a malformed string.
 parse_to_epoch() {
   local s="${1:-}" Y M D H Mi S days
   if [[ "${s}" =~ ^([0-9]{4})-([0-9]{2})-([0-9]{2})([T\ ]([0-9]{2}):([0-9]{2})(:([0-9]{2}))?)?$ ]]; then
@@ -44,8 +30,6 @@ parse_to_epoch() {
   echo $(( days * 86400 + 10#${H} * 3600 + 10#${Mi} * 60 + 10#${S} ))
 }
 
-# fmt_duration SECONDS -> a compact "Nd Nh" / "Nh Nm" / "Nm" / "<1m" string.
-# Negative input is treated as zero.
 fmt_duration() {
   local secs="${1:-0}"
   [[ "${secs}" =~ ^-?[0-9]+$ ]] || secs=0
@@ -65,8 +49,6 @@ fmt_duration() {
   fi
 }
 
-# offset_minutes "+HHMM" -> the signed offset in minutes. Returns 0 and a nonzero
-# status on a malformed value, so callers can guard.
 offset_minutes() {
   local z="${1:-}" val
   if [[ "${z}" =~ ^([+-])([0-9]{2})([0-9]{2})$ ]]; then

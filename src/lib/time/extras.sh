@@ -1,12 +1,4 @@
 #!/usr/bin/env bash
-#
-# extras.sh: extra time placeholders built on the clock seams and pure math.
-#
-# Developer formats (epoch, ISO 8601, UTC offset), the ISO week and day-of-year,
-# a countdown to a target datetime, and a stopwatch since a mark. Every clock
-# read goes through the _now_local / _now_epoch seams so tests pin a fixed clock,
-# and all arithmetic is the portable pure math from datemath.sh. Also holds the
-# pure per-zone helpers the dispatcher uses to decorate world clocks.
 
 [[ -n "${_TIME_REVAMPED_EXTRAS_LOADED:-}" ]] && return 0
 _TIME_REVAMPED_EXTRAS_LOADED=1
@@ -17,11 +9,8 @@ source "${_TIME_EXTRAS_DIR}/../tmux/tmux-ops.sh"
 # shellcheck source=/dev/null
 source "${_TIME_EXTRAS_DIR}/datemath.sh"
 
-# read_epoch -> the current unix epoch.
 read_epoch() { _now_epoch; }
 
-# read_iso -> the local time in ISO 8601 with a colon in the offset, for example
-# 2026-06-30T14:30:00-03:00.
 read_iso() {
   local s
   s=$(_now_local "%Y-%m-%dT%H:%M:%S%z")
@@ -32,7 +21,6 @@ read_iso() {
   fi
 }
 
-# read_offset -> the local UTC offset as "UTC", "UTC+02:00", or "UTC-03:00".
 read_offset() {
   local z m total sign hh mm
   z=$(_now_local "%z")
@@ -47,7 +35,6 @@ read_offset() {
   printf 'UTC%s%02d:%02d\n' "${sign}" "${hh}" "${mm}"
 }
 
-# read_week -> the ISO 8601 week number with no leading zero.
 read_week() {
   local w
   w=$(_now_local "%V")
@@ -55,7 +42,6 @@ read_week() {
   echo $(( 10#${w} ))
 }
 
-# read_doy -> the day of the year with no leading zero.
 read_doy() {
   local j
   j=$(_now_local "%j")
@@ -63,9 +49,6 @@ read_doy() {
   echo $(( 10#${j} ))
 }
 
-# read_until -> the countdown to @time_revamped_countdown_target, optionally
-# prefixed by @time_revamped_countdown_label. The target and "now" are parsed in
-# the same naive frame, so the local offset cancels and no timezone DB is needed.
 read_until() {
   local target label tep now nep diff text done_txt
   target=$(get_tmux_option "@time_revamped_countdown_target" "")
@@ -90,8 +73,6 @@ read_until() {
   fi
 }
 
-# read_elapsed -> the stopwatch since the mark stored in @time_revamped_mark_epoch,
-# empty when no mark is set.
 read_elapsed() {
   local mark now diff
   mark=$(get_tmux_option "@time_revamped_mark_epoch" "")
@@ -103,8 +84,6 @@ read_elapsed() {
   fmt_duration "${diff}"
 }
 
-# relative_day_badge ZY ZM ZD LY LM LD -> "+1d" or "-1d" style badge when the
-# zone's calendar day differs from the local day, empty when they match.
 relative_day_badge() {
   local zd ld delta
   [[ "${1:-}" =~ ^[0-9]+$ && "${4:-}" =~ ^[0-9]+$ ]] || return 0
@@ -118,7 +97,6 @@ relative_day_badge() {
   fi
 }
 
-# in_work_hours HOUR START END -> 0 when START <= HOUR < END.
 in_work_hours() {
   local h="${1:-0}" s="${2:-0}" e="${3:-0}"
   [[ "${h}" =~ ^[0-9]+$ ]] || h=0

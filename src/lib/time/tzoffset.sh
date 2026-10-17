@@ -1,13 +1,4 @@
 #!/usr/bin/env bash
-#
-# tzoffset.sh: DST-change warning and shared business-hours overlap.
-#
-# Both features need the UTC offset of a zone at a given epoch. That single read
-# lives behind the _tz_offset_for_epoch seam, which hides the only BSD/GNU date
-# difference (an epoch is formatted with `date -r` on BSD and `date -d @` on GNU).
-# Everything above the seam is pure: the future epochs are plain arithmetic and
-# the overlap mask is integer math, so tests pin the clock and the seam to cover
-# every branch without a real date call.
 
 [[ -n "${_TIME_REVAMPED_TZOFFSET_LOADED:-}" ]] && return 0
 _TIME_REVAMPED_TZOFFSET_LOADED=1
@@ -18,7 +9,6 @@ source "${_TIME_TZOFFSET_DIR}/../tmux/tmux-ops.sh"
 # shellcheck source=/dev/null
 source "${_TIME_TZOFFSET_DIR}/datemath.sh"
 
-# _date_is_gnu -> 0 when the date binary is GNU coreutils (supports --version).
 _date_is_gnu() { date --version >/dev/null 2>&1; }
 
 _date_detect() {
@@ -26,8 +16,6 @@ _date_detect() {
   if _date_is_gnu; then _TIME_DATE_GNU=1; else _TIME_DATE_GNU=0; fi
 }
 
-# _tz_offset_for_epoch TZ EPOCH -> the "%z" offset of TZ at EPOCH. An empty TZ
-# means the local zone. Host-probe seam; tests override this.
 _tz_offset_for_epoch() {
   local tz="${1:-}" ep="${2:-0}" flag
   _date_detect
@@ -39,8 +27,6 @@ _tz_offset_for_epoch() {
   fi
 }
 
-# read_dst -> "DST in Nd" when the zone's UTC offset changes within the horizon,
-# empty otherwise. The zone is @time_revamped_dst_zone (empty means local).
 read_dst() {
   local zone horizon now base off d label
   zone=$(get_tmux_option "@time_revamped_dst_zone" "")
@@ -62,8 +48,6 @@ read_dst() {
   done
 }
 
-# _overlap_mask "OFF1,OFF2,..." START END -> a 24-char string of 1/0, one per UTC
-# hour, where every zone (given as signed offset minutes) is within [START,END).
 _overlap_mask() {
   local offsets_csv="${1}" start="${2}" end="${3}"
   local offs=() IFS=','
@@ -82,9 +66,6 @@ _overlap_mask() {
   printf '%s\n' "${mask}"
 }
 
-# _overlap_window MASK -> "START END" for the longest run of 1s, treating the day
-# as circular so a window may wrap past midnight (END can exceed 24). Empty when
-# there is no overlap.
 _overlap_window() {
   local mask="${1}" i c
   local n="${#mask}"
@@ -111,9 +92,6 @@ _overlap_window() {
   printf '%d %d\n' "${best_start}" "$(( best_start + best_len ))"
 }
 
-# read_overlap -> the shared working-hours window across @time_revamped_timezones,
-# expressed in the local zone, or a "no overlap" message. Empty when no zones are
-# configured or an offset cannot be resolved.
 read_overlap() {
   local zones ws we now tz off m offsets="" mask win start end localoff lm lstart lend
   local prefix none

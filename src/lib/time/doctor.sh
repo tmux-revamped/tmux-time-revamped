@@ -1,10 +1,4 @@
 #!/usr/bin/env bash
-#
-# doctor.sh: validate the configured timezone names and report typos.
-#
-# A zone is valid when its zoneinfo file exists, which is the same check on macOS
-# and Linux. The filesystem probe sits behind the _tz_exists seam so the report
-# logic is tested with a pinned set of valid and invalid zones.
 
 [[ -n "${_TIME_REVAMPED_DOCTOR_LOADED:-}" ]] && return 0
 _TIME_REVAMPED_DOCTOR_LOADED=1
@@ -13,15 +7,12 @@ _TIME_DOCTOR_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=/dev/null
 source "${_TIME_DOCTOR_DIR}/../tmux/tmux-ops.sh"
 
-# Where the system keeps the zoneinfo database.
 TIME_ZONEINFO_DIR="${TIME_ZONEINFO_DIR:-/usr/share/zoneinfo}"
 
-# _tz_exists ZONE -> 0 when the zoneinfo file for ZONE exists. Host-probe seam.
 _tz_exists() {
   [[ -f "${TIME_ZONEINFO_DIR}/${1}" ]]
 }
 
-# read_doctor -> a per-zone OK/BAD report plus a one-line summary.
 read_doctor() {
   local zones list=() i tz ok=0 bad=0 out=""
   zones=$(get_tmux_option "@time_revamped_timezones" "")

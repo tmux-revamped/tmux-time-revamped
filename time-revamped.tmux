@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
-#
-# time-revamped.tmux: TPM entry point.
-#
-# Replaces the #{time_*} placeholders in status-left and status-right with calls
-# to the dispatcher, which computes the clock live and never blocks the render.
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TIME_CMD="${PLUGIN_DIR}/src/time.sh"
@@ -93,8 +88,6 @@ update_option() {
   tmux set-option -gq "${option}" "$(interpolate "${current}")"
 }
 
-# bind_key OPTION DEFAULT SUBCOMMAND: bind a key to a dispatcher action. The key
-# comes from OPTION, falling back to DEFAULT; the literal value "off" skips it.
 bind_key() {
   local opt="${1}" default="${2}" subcmd="${3}" key
   key=$(tmux show-option -gqv "${opt}")
@@ -115,8 +108,6 @@ if [[ "${render_mode}" == "options" ]]; then
   "${TIME_CMD}" start 2>/dev/null || true
 fi
 
-# The prefix menu is bound by default; the standalone actions are opt-in so they
-# never clobber a user's keys. The menu already exposes calendar, copy, and mark.
 bind_key "@time_revamped_menu_key" "M-t" "menu"
 bind_key "@time_revamped_calendar_key" "off" "calendar"
 bind_key "@time_revamped_copy_key" "off" "copy iso"

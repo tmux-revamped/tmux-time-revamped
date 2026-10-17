@@ -1,11 +1,4 @@
 #!/usr/bin/env bash
-#
-# time.sh: command dispatcher for tmux-time-revamped.
-#
-# Usage: time.sh datetime | date | clock | zones
-#
-# The clock is computed live on every call. A date read is instant, so there is
-# no slow probe to cache and no temp file is touched.
 
 PLUGIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
@@ -40,10 +33,8 @@ source "${PLUGIN_DIR}/src/lib/time/doctor.sh"
 # shellcheck source=/dev/null
 source "${PLUGIN_DIR}/src/lib/tmux/tmux-cmd.sh"
 
-# Path the prefix menu uses to call back into this dispatcher.
 export TIME_DISPATCH="${PLUGIN_DIR}/src/time.sh"
 
-# read_zones -> the configured world clocks, formatted and joined.
 read_zones() {
   local zones compact sep out="" tz hour tm abbr dow weekend entry wk_override tpat
   local labels_csv custom label i
@@ -52,19 +43,10 @@ read_zones() {
   [[ -z "${zones}" ]] && return 0
   compact=$(get_tmux_option "@time_revamped_compact" "0")
   sep=$(get_tmux_option "@time_revamped_zone_separator" " ")
-  # Optional per-zone labels, comma separated and matched to the timezones by
-  # position, for example "Los Angeles, New York, Tokyo".
   labels_csv=$(get_tmux_option "@time_revamped_zone_labels" "")
-  # When off, world clocks keep their time-of-day color and icon on weekends
-  # instead of switching to the weekend color.
   wk_override=$(get_tmux_option "@time_revamped_weekend_override" "1")
-  # World clocks honor the same 24H/12H option as the local clock. A 12H pattern
-  # contains a space, so fields are pipe-delimited. "hide" has no meaning for a
-  # clock, so it falls back to 24H.
   tpat=$(time_strftime "$(get_tmux_option "@time_revamped_time_format" "24H")")
   [[ -z "${tpat}" ]] && tpat="%H:%M"
-  # Optional decorations: a +1d/-1d badge per zone, dimming a zone outside
-  # working hours, and a highlight on the primary zone (zero-based index).
   rel=$(get_tmux_option "@time_revamped_relative_day" "0")
   wh=$(get_tmux_option "@time_revamped_work_hours" "0")
   ws=$(get_tmux_option "@time_revamped_work_start" "9")
@@ -109,7 +91,6 @@ read_zones() {
   echo "${out}"
 }
 
-# _geoip_max_age -> the geoip cache lifetime in seconds, from a minutes option.
 _geoip_max_age() {
   local m
   m=$(get_tmux_option "@time_revamped_geoip_interval" "30")
@@ -117,8 +98,6 @@ _geoip_max_age() {
   echo $(( m * 60 ))
 }
 
-# geoip_refresh -> the cache worker: fetch the city once and store it. A failed
-# fetch keeps the last good value, so a brief outage does not blank the label.
 geoip_refresh() {
   local endpoint body city
   endpoint=$(get_tmux_option "@time_revamped_geoip_endpoint" "https://ipinfo.io/city")
@@ -131,9 +110,6 @@ geoip_refresh() {
   fi
 }
 
-# _local_label_auto -> the auto-detected place label. With geoip enabled and curl
-# present, the cached city wins, refreshed in the background so the render never
-# waits on the network. Otherwise it falls back to the system timezone city.
 _local_label_auto() {
   local city
   if [[ "$(get_tmux_option "@time_revamped_local_source" "timezone")" == "geoip" ]] && has_command curl; then
@@ -143,10 +119,6 @@ _local_label_auto() {
   local_city_label
 }
 
-# read_local -> the local clock rendered like a world clock: a place label, a
-# time-of-day color and icon, and the time. The label is @time_revamped_local_label
-# when set, else the local timezone city (auto-updates when the system zone
-# changes while traveling). Honors the 24H/12H and weekend-override options.
 read_local() {
   local label compact tpat hour tm dow weekend override
   compact=$(get_tmux_option "@time_revamped_compact" "0")

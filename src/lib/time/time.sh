@@ -1,11 +1,4 @@
 #!/usr/bin/env bash
-#
-# time.sh: local clock and world-clock data.
-#
-# Pure formatters map option names to strftime patterns and timezone labels. The
-# actual clock reads sit behind seams the tests override, so no real date call
-# runs under test. Everything is computed live; date is instant, so there is no
-# slow probe to push to a background worker.
 
 [[ -n "${_TIME_REVAMPED_TIME_LOADED:-}" ]] && return 0
 _TIME_REVAMPED_TIME_LOADED=1
@@ -14,7 +7,6 @@ _TIME_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=/dev/null
 source "${_TIME_LIB_DIR}/../tmux/tmux-ops.sh"
 
-# date_strftime NAME -> a strftime date pattern, empty for "hide".
 date_strftime() {
   case "${1}" in
     YMD) echo "%Y-%m-%d" ;;
@@ -27,7 +19,6 @@ date_strftime() {
   esac
 }
 
-# time_strftime NAME -> a strftime time pattern, empty for "hide".
 time_strftime() {
   case "${1}" in
     12H)  echo "%I:%M %p" ;;
@@ -36,7 +27,6 @@ time_strftime() {
   esac
 }
 
-# compact_tz_label TZ -> a short label from the city, e.g. America/New_York -> NY.
 compact_tz_label() {
   local city="${1##*/}"
   if [[ "${city}" == *_* ]]; then
@@ -51,9 +41,6 @@ compact_tz_label() {
   fi
 }
 
-# zone_label_at INDEX CSV -> the trimmed label at zero-based INDEX in a comma
-# separated list, empty when absent. Labels may contain spaces, so only commas
-# separate them, for example "Los Angeles, New York, Tokyo".
 zone_label_at() {
   local idx="${1}" item arr=()
   local IFS=','
@@ -64,14 +51,11 @@ zone_label_at() {
   printf '%s' "${item}"
 }
 
-# tz_is_weekend DOW -> 1 on Saturday (6) or Sunday (7), else 0.
 tz_is_weekend() {
   [[ "${1}" == "6" || "${1}" == "7" ]] && { echo 1; return 0; }
   echo 0
 }
 
-# local_city_label -> the local timezone city with underscores as spaces, e.g.
-# America/Sao_Paulo -> "Sao Paulo". Empty when the zone cannot be resolved.
 local_city_label() {
   local zone city
   zone=$(_local_tz_name)
@@ -80,12 +64,9 @@ local_city_label() {
   echo "${city//_/ }"
 }
 
-# Host-probe seams. Tests override these.
 _now_local() { date +"${1}" 2>/dev/null; }
 _now_tz() { TZ="${1}" date +"${2}" 2>/dev/null; }
 
-# _local_tz_name -> the local IANA timezone, e.g. America/Sao_Paulo. Prefers $TZ,
-# then the /etc/localtime symlink target. Empty when neither resolves.
 _local_tz_name() {
   if [[ -n "${TZ:-}" ]]; then
     echo "${TZ}"
@@ -99,7 +80,6 @@ _local_tz_name() {
   esac
 }
 
-# read_date -> the formatted local date, empty when hidden.
 read_date() {
   local fmt pat
   fmt=$(get_tmux_option "@time_revamped_date_format" "YMD")
@@ -107,7 +87,6 @@ read_date() {
   [[ -n "${pat}" ]] && _now_local "${pat}"
 }
 
-# read_clock -> the formatted local time, empty when hidden.
 read_clock() {
   local fmt pat
   fmt=$(get_tmux_option "@time_revamped_time_format" "24H")
@@ -115,7 +94,6 @@ read_clock() {
   [[ -n "${pat}" ]] && _now_local "${pat}"
 }
 
-# read_datetime -> "<date> <time>", or whichever part is present.
 read_datetime() {
   local d c
   d=$(read_date)
