@@ -123,7 +123,7 @@ geoip_refresh() {
   local endpoint body city
   endpoint=$(get_tmux_option "@time_revamped_geoip_endpoint" "https://ipinfo.io/city")
   body=$(_read_geoip "${endpoint}")
-  city=$(geoip_parse_city "${body}")
+  city=$(publish_escape "$(geoip_parse_city "${body}")")
   if [[ -n "${city}" ]]; then
     cache_set geoip_city "${city}"
   else

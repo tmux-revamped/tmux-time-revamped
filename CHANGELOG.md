@@ -25,6 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- With `@time_revamped_local_source 'geoip'`, the city from the network
+  response reached the status line unfiltered except for `<`, `>` and `{`, so
+  a response holding `#(...)` ran a command through tmux. A city is now
+  accepted only when it holds letters, digits, spaces, UTF-8 characters and `.
+  , ' -`, and any `#` is doubled before tmux sees it.
 - In options mode, running the entry point a second time, as two overlapping
   config reloads do, found no placeholders left in the status line and
   published nothing, which froze every value. A metric whose option read is

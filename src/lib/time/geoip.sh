@@ -20,9 +20,14 @@ _read_geoip() {
   curl -fsS --max-time "${GEOIP_TIMEOUT}" "${1}" 2>/dev/null
 }
 
+geoip_city_chars_safe() {
+  [[ -z "$(printf '%s' "${1}" | LC_ALL=C tr -d "A-Za-z0-9 .,'\200-\377-")" ]]
+}
+
 # geoip_parse_city BODY -> the city name from a response, empty when none.
 # Handles a JSON body carrying "city":"X" and a plain-text body that is the bare
-# city. Rejects empty, HTML-looking, or over-long values.
+# city. Rejects empty or over-long values and any value holding a character other
+# than letters, digits, spaces, UTF-8 bytes, and . , ' -.
 geoip_parse_city() {
   local body="${1}" city
   case "${body}" in
@@ -33,11 +38,13 @@ geoip_parse_city() {
       city=$(printf '%s' "${body}" | head -n1 | tr -d '\r')
       ;;
   esac
-  case "${city}" in
-    "" | *"<"* | *">"* | *"{"*) echo "" ;;
-    *) [[ "${#city}" -le "${GEOIP_MAX_CITY_LEN}" ]] && printf '%s' "${city}" || echo "" ;;
-  esac
+  if [[ -z "${city}" || "${#city}" -gt "${GEOIP_MAX_CITY_LEN}" ]] || ! geoip_city_chars_safe "${city}"; then
+    echo ""
+    return 0
+  fi
+  printf '%s' "${city}"
 }
 
 export -f _read_geoip
+export -f geoip_city_chars_safe
 export -f geoip_parse_city

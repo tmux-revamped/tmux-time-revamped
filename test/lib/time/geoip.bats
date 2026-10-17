@@ -39,3 +39,29 @@ teardown() {
   GEOIP_TIMEOUT=1 run _read_geoip "http://127.0.0.1:1"
   true
 }
+
+@test "geoip.sh - rejects a city carrying tmux format or shell syntax" {
+  # Arrange
+  local -a bodies=('#(touch /tmp/x)' '{"city":"Rio #[fg=red]"}' 'Lima$(id)' $'Oslo\033[31m')
+  local body
+  local -a got=()
+
+  # Act
+  for body in "${bodies[@]}"; do
+    got+=("$(geoip_parse_city "${body}")")
+  done
+
+  # Assert
+  [[ -z "$(printf '%s' "${got[@]}")" ]]
+}
+
+@test "geoip.sh - keeps an accented city with punctuation" {
+  # Arrange
+  local body='{"city":"São Paulo, St. John'"'"'s-Town"}'
+
+  # Act
+  run geoip_parse_city "${body}"
+
+  # Assert
+  [[ "${output}" == "São Paulo, St. John's-Town" ]]
+}
