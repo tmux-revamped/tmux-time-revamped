@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and bash 5.
 - The menu quotes the plugin path, so its actions run when the plugin is
   installed under a directory whose name contains a space or a single quote.
+- Switching from options mode back to jobs mode left the background process
+  running. Jobs mode now releases it, and it exits on its next tick.
 
 ## [2.0.0] - 2026-10-17
 

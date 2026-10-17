@@ -106,6 +106,8 @@ update_option "status-right"
 
 if [[ "${render_mode}" == "options" ]]; then
   "${TIME_CMD}" start 2>/dev/null || true
+else
+  tmux set-option -gqu "@time_revamped_ticker_pid"
 fi
 
 bind_key "@time_revamped_menu_key" "M-t" "menu"

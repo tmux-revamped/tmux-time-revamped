@@ -140,3 +140,15 @@ record_bind_keys() {
   # Assert
   [[ "$(cat "${BIND_LOG}")" == "bind-key M-t run-shell $(cd "${TEST_TMPDIR}" && pwd)/it\\'s\\ ##x\\ dir/src/time.sh menu" ]]
 }
+
+@test "entry - jobs mode releases a running ticker so the daemon exits" {
+  # Arrange
+  tmux set-option -gq "@time_revamped_ticker_pid" "4242"
+  tmux set-option -gq "status-right" "[#{time_local}]"
+
+  # Act
+  bash "${ENTRY}"
+
+  # Assert
+  [ ! -f "$(_mock_opt_file @time_revamped_ticker_pid)" ]
+}
