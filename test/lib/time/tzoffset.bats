@@ -4,7 +4,7 @@ load "${BATS_TEST_DIRNAME}/../../helpers.bash"
 
 setup() {
   setup_test_environment
-  unset _TIME_REVAMPED_TZOFFSET_LOADED _TIME_REVAMPED_DATEMATH_LOADED
+  unset _TIME_REVAMPED_TZOFFSET_LOADED _TIME_REVAMPED_DATEMATH_LOADED _TIME_DATE_GNU
   source "${BATS_TEST_DIRNAME}/../../../src/lib/time/tzoffset.sh"
 }
 
@@ -130,4 +130,31 @@ teardown() {
   _tz_offset_for_epoch() { echo "GMT"; }
   set_tmux_option "@time_revamped_timezones" "UTC"
   [[ -z "$(read_overlap)" ]]
+}
+
+@test "tzoffset.sh - read_dst probes the date flavor once for the whole horizon" {
+  # Arrange
+  local probes="${BATS_TEST_TMPDIR}/probes"
+  _now_epoch() { echo 1000000; }
+  _date_is_gnu() { printf 'x\n' >>"${probes}"; return 0; }
+  date() { echo "+0000"; }
+  set_tmux_option "@time_revamped_dst_horizon" "14"
+
+  # Act
+  read_dst >/dev/null
+
+  # Assert
+  [ "$(wc -l <"${probes}" | tr -d ' ')" -eq 1 ]
+}
+
+@test "tzoffset.sh - the offset read uses the BSD epoch flag when date is not GNU" {
+  # Arrange
+  _date_is_gnu() { return 1; }
+  date() { printf '%s\n' "$*"; }
+
+  # Act
+  run _tz_offset_for_epoch "" 42
+
+  # Assert
+  [[ "${output}" == "-r42 +%z" ]]
 }

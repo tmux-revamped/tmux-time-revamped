@@ -25,6 +25,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The DST warning ran `date --version` once for every day of its horizon on
+  every render, fifteen extra processes with the default horizon. The date
+  flavor is now detected once per process.
 - The calendar popup ran its `read -rsn1 -p` under tmux's default shell, which
   zsh and dash reject, so with either as the default shell the popup closed at
   once or printed an error. The popup now runs its script with bash.

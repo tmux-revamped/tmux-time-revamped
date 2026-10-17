@@ -21,11 +21,17 @@ source "${_TIME_TZOFFSET_DIR}/datemath.sh"
 # _date_is_gnu -> 0 when the date binary is GNU coreutils (supports --version).
 _date_is_gnu() { date --version >/dev/null 2>&1; }
 
+_date_detect() {
+  [[ -n "${_TIME_DATE_GNU:-}" ]] && return 0
+  if _date_is_gnu; then _TIME_DATE_GNU=1; else _TIME_DATE_GNU=0; fi
+}
+
 # _tz_offset_for_epoch TZ EPOCH -> the "%z" offset of TZ at EPOCH. An empty TZ
 # means the local zone. Host-probe seam; tests override this.
 _tz_offset_for_epoch() {
   local tz="${1:-}" ep="${2:-0}" flag
-  if _date_is_gnu; then flag="-d@${ep}"; else flag="-r${ep}"; fi
+  _date_detect
+  if [[ "${_TIME_DATE_GNU}" == "1" ]]; then flag="-d@${ep}"; else flag="-r${ep}"; fi
   if [[ -n "${tz}" ]]; then
     TZ="${tz}" date "${flag}" +%z 2>/dev/null
   else
@@ -42,6 +48,7 @@ read_dst() {
   [[ "${horizon}" =~ ^[0-9]+$ ]] || horizon=14
   now=$(_now_epoch)
   [[ "${now}" =~ ^[0-9]+$ ]] || return 0
+  _date_detect
   base=$(_tz_offset_for_epoch "${zone}" "${now}")
   [[ -n "${base}" ]] || return 0
   label=$(get_tmux_option "@time_revamped_dst_label" "DST")
@@ -118,6 +125,7 @@ read_overlap() {
   [[ "${now}" =~ ^[0-9]+$ ]] || return 0
   local list=() i IFS=$', '
   read -ra list <<< "${zones}"
+  _date_detect
   for (( i = 0; i < ${#list[@]}; i++ )); do
     tz="${list[i]}"
     [[ -z "${tz}" ]] && continue
@@ -144,6 +152,7 @@ read_overlap() {
 }
 
 export -f _date_is_gnu
+export -f _date_detect
 export -f _tz_offset_for_epoch
 export -f read_dst
 export -f _overlap_mask
