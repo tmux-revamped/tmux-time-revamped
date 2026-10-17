@@ -113,10 +113,7 @@ teardown() {
   export TIME_DISPATCH="/p a/it's/time.sh"
   _tmux() { printf '%s\n' "$@" > "${CAP}"; }
   local expected
-  expected="$(cat <<'EXPECTED'
-run-shell "/p\\ a/it\\'s/time.sh copy iso"
-EXPECTED
-)"
+  expected='run-shell "/p\\ a/it\\'"'"'s/time.sh copy iso"'
 
   # Act
   time_menu

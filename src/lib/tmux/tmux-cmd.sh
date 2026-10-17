@@ -58,12 +58,8 @@ time_calendar_popup() {
 }
 
 _time_menu_cmd() {
-  local cmd hash="#" bs='\' dq='"' dl='$' ebs='\\' edq='\"' edl='\$'
-  cmd="$(printf '%q %s' "${TIME_DISPATCH:-}" "${1}")"
-  cmd="${cmd//"${hash}"/${hash}${hash}}"
-  cmd="${cmd//"${bs}"/${ebs}}"
-  cmd="${cmd//"${dq}"/${edq}}"
-  printf '%s' "${cmd//"${dl}"/${edl}}"
+  printf '%q %s' "${TIME_DISPATCH:-}" "${1}" |
+    sed -e 's/#/##/g' -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e 's/\$/\\$/g'
 }
 
 time_menu() {
