@@ -107,7 +107,7 @@ fi
 
 # The prefix menu is bound by default; the standalone actions are opt-in so they
 # never clobber a user's keys. The menu already exposes calendar, copy, and mark.
-bind_key "@time_revamped_menu_key" "T" "menu"
+bind_key "@time_revamped_menu_key" "M-t" "menu"
 bind_key "@time_revamped_calendar_key" "off" "calendar"
 bind_key "@time_revamped_copy_key" "off" "copy iso"
 bind_key "@time_revamped_mark_key" "off" "mark"

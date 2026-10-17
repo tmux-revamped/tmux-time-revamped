@@ -65,3 +65,50 @@ teardown() {
 
   [[ "$(cat "$(_mock_opt_file @time_revamped_published)")" == "local" ]]
 }
+
+record_bind_keys() {
+  export BIND_LOG="${TEST_TMPDIR}/bind.log"
+  eval "$(declare -f tmux | sed '1s/^tmux/_mock_tmux/')"
+  tmux() {
+    if [[ "${1}" == "bind-key" ]]; then
+      printf '%s\n' "$*" >> "${BIND_LOG}"
+      return 0
+    fi
+    _mock_tmux "$@"
+  }
+  export -f _mock_tmux tmux
+}
+
+@test "entry - the menu key defaults to M-t" {
+  # Arrange
+  record_bind_keys
+
+  # Act
+  bash "${ENTRY}"
+
+  # Assert
+  [[ "$(cat "${BIND_LOG}")" == "bind-key M-t run-shell "*"/src/time.sh menu" ]]
+}
+
+@test "entry - a menu key of off binds nothing" {
+  # Arrange
+  record_bind_keys
+  tmux set-option -gq "@time_revamped_menu_key" "off"
+
+  # Act
+  bash "${ENTRY}"
+
+  # Assert
+  [ ! -e "${BIND_LOG}" ]
+}
+
+@test "entry - the calendar action stays unbound by default" {
+  # Arrange
+  record_bind_keys
+
+  # Act
+  bash "${ENTRY}"
+
+  # Assert
+  [[ "$(cat "${BIND_LOG}")" != *"calendar"* ]]
+}

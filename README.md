@@ -4,7 +4,7 @@
 
 **Local clock and world clocks in your tmux status bar, without ever blocking the render.**
 
-[![Tests](https://github.com/tmux-revamped/tmux-time-revamped/actions/workflows/tests.yml/badge.svg)](https://github.com/tmux-revamped/tmux-time-revamped/actions/workflows/tests.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-1.2.0-blue.svg)](CHANGELOG.md)
+[![Tests](https://github.com/tmux-revamped/tmux-time-revamped/actions/workflows/tests.yml/badge.svg)](https://github.com/tmux-revamped/tmux-time-revamped/actions/workflows/tests.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](CHANGELOG.md)
 
 </div>
 
@@ -105,7 +105,7 @@ run-shell ~/.tmux/plugins/tmux-time-revamped/time-revamped.tmux
 | `@time_revamped_dst_label` | `DST` | text shown before the days-until count |
 | `@time_revamped_overlap_label` | `overlap` | text shown before the `#{time_overlap}` window |
 | `@time_revamped_overlap_none` | `no overlap` | text shown when there is no shared window |
-| `@time_revamped_menu_key` | `T` | prefix key that opens the actions menu; set `off` to disable |
+| `@time_revamped_menu_key` | `M-t` | prefix key that opens the actions menu; set `off` to disable |
 | `@time_revamped_calendar_key` | `off` | optional prefix key that opens the calendar popup |
 | `@time_revamped_copy_key` | `off` | optional prefix key that copies the ISO timestamp |
 | `@time_revamped_mark_key` | `off` | optional prefix key that sets the stopwatch mark |
@@ -147,7 +147,7 @@ Three opt-in decorations make a row of world clocks easier to read. Set `@time_r
 
 ### The actions menu
 
-`prefix + T` opens a menu to toggle 12/24-hour time, open a calendar popup, copy the current timestamp as ISO 8601 or epoch to the tmux buffer and the system clipboard, set the stopwatch mark, and run a `doctor` report that checks every configured timezone name for typos. The popup and clipboard each route through a single seam, and the calendar popup needs tmux 3.2 or newer. Rebind or disable the menu with `@time_revamped_menu_key`, and bind the individual actions directly with `@time_revamped_calendar_key`, `@time_revamped_copy_key`, and `@time_revamped_mark_key`.
+`prefix + M-t` opens a menu to toggle 12/24-hour time, open a calendar popup, copy the current timestamp as ISO 8601 or epoch to the tmux buffer and the system clipboard, set the stopwatch mark, and run a `doctor` report that checks every configured timezone name for typos. The popup and clipboard each route through a single seam, and the calendar popup needs tmux 3.2 or newer. Rebind or disable the menu with `@time_revamped_menu_key`, where `T` restores the key used before 2.0.0, and bind the individual actions directly with `@time_revamped_calendar_key`, `@time_revamped_copy_key`, and `@time_revamped_mark_key`.
 
 ## Theme color suggestions
 

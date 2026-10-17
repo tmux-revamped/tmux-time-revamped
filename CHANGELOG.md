@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-17
+
 ### Added
 
 - `@time_revamped_render 'options'` replaces the `#()` calls with tmux option
@@ -17,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Breaking:** the actions menu moves from `prefix + T` to `prefix + M-t`, the
+  key the family allocation gives this plugin, so `T` goes back to tmux's own
+  binding. Set `@time_revamped_menu_key` to `T` to keep the old key. The
+  calendar, copy and mark actions stay unbound by default.
 - The options-mode background process reads every option it needs in one tmux
   call per tick, sends its cache writes and published values in a second, and
   keeps its functions out of the environment of the commands it runs. Options
