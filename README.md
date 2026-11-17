@@ -275,6 +275,8 @@ The DST and overlap checks run `date` with `-d` on GNU and `-r` on BSD, detected
 | `make lint` | shellcheck at warning level on every shell file |
 | `make coverage` | kcov line coverage with a 95 percent floor, Linux only |
 
+On macOS, `brew bundle` installs every tool these targets call, from the [`Brewfile`](Brewfile).
+
 ## License
 
 [MIT](LICENSE), copyright Gustavo Franco.

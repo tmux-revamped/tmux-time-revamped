@@ -275,6 +275,8 @@ graph LR
 | `make lint` | 对所有 shell 文件运行 warning 级别的 shellcheck |
 | `make coverage` | kcov 行覆盖率，下限 95%，仅 Linux |
 
+在 macOS 上，运行 `brew bundle` 会根据 [`Brewfile`](Brewfile) 安装这些目标用到的所有工具。
+
 ## 许可证
 
 [MIT](LICENSE)，copyright Gustavo Franco。

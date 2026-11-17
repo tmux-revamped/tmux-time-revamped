@@ -275,6 +275,8 @@ graph LR
 | `make lint` | すべてのシェルファイルに対するwarningレベルのshellcheck |
 | `make coverage` | 下限95パーセントのkcovによる行カバレッジ、Linuxのみ |
 
+macOS では、`brew bundle` を実行すると、これらのターゲットが使うツールがすべて [`Brewfile`](Brewfile) からインストールされます。
+
 ## ライセンス
 
 [MIT](LICENSE)、copyright Gustavo Franco。
