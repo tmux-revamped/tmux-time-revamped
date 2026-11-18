@@ -1,5 +1,32 @@
 # Changelog
 
+# [3.0.0](https://github.com/tmux-revamped/tmux-time-revamped/compare/v2.0.0...v3.0.0) (2026-11-18)
+
+
+### Bug Fixes
+
+* **family:** fail when git cannot read a mode ([bf831c5](https://github.com/tmux-revamped/tmux-time-revamped/commit/bf831c5158962483e9d7a79c2dbbc0779d08ff41))
+* **family:** honor only active exceptions ([3c3c5bf](https://github.com/tmux-revamped/tmux-time-revamped/commit/3c3c5bf6c3349466e111e3f2d3fedd56eb5074f9))
+* **family:** reject unquoted replacements ([3b87367](https://github.com/tmux-revamped/tmux-time-revamped/commit/3b873672438683f0304d7685b98cc80bab43e32b))
+* **family:** require executable entry points ([de79809](https://github.com/tmux-revamped/tmux-time-revamped/commit/de79809c8c56d902ad0d849b9fa4490497d645c9))
+
+
+### Documentation
+
+* add the settings and value rules ([e569333](https://github.com/tmux-revamped/tmux-time-revamped/commit/e5693333fe9d9aa4607687740b7ea33e8320daa0))
+
+
+### Features
+
+* add a shared desktop notifier ([1b954bb](https://github.com/tmux-revamped/tmux-time-revamped/commit/1b954bb236dc8fbfe58d4ebbc4a849ab47ea9465))
+* **family:** accept bot updates in the audit ([edd045b](https://github.com/tmux-revamped/tmux-time-revamped/commit/edd045bbe5187a5e99b344f25696a9efa525d6e8))
+
+
+### BREAKING CHANGES
+
+* decided on its own, apart from the alias rule, which
+is about names.
+
 ## [2.0.0] - 2026-10-17
 
 ### Added
