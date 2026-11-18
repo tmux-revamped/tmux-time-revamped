@@ -1,25 +1,5 @@
 # Changelog
 
-All notable changes to this project are documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
-
-### Fixed
-
-- The plugin path is quoted with `printf %q`, with every `#` doubled, in each
-  `#()` status call and in the key binding's `run-shell` command, so a plugin
-  directory whose path holds a space, a quote or a `#` no longer breaks every
-  metric and the binding. Placeholders are spliced by prefix and suffix instead
-  of a pattern substitution, which treats a backslash differently in bash 3.2
-  and bash 5.
-- The menu quotes the plugin path, so its actions run when the plugin is
-  installed under a directory whose name contains a space or a single quote.
-- Switching from options mode back to jobs mode left the background process
-  running. Jobs mode now releases it, and it exits on its next tick.
-
 ## [2.0.0] - 2026-10-17
 
 ### Added
