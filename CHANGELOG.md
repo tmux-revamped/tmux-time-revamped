@@ -1,5 +1,23 @@
 # Changelog
 
+# [4.0.0](https://github.com/tmux-revamped/tmux-time-revamped/compare/v3.0.0...v4.0.0) (2026-11-19)
+
+
+* feat!: rewrite the plugin in POSIX sh ([76f1233](https://github.com/tmux-revamped/tmux-time-revamped/commit/76f1233eac5570a5a53a7b6ea15203b38af1d1bc))
+
+
+### BREAKING CHANGES
+
+* the script moved from src/time.sh to
+bin/time-revamped. A placeholder is printed by "time-revamped status
+NAME", where it was "time.sh NAME", and "time.sh start" is now
+"time-revamped apply". bash is no longer required, and the calendar
+popup runs without it. A 12 hour clock prints AM and PM under the C
+locale, where it used to follow the locale. doctor prints one row per
+dependency, where it printed OK and BAD lines. The environment knobs
+GEOIP_TIMEOUT, TIME_ZONEINFO_DIR, TICKER_MAX_TICKS and CACHE_* are
+gone.
+
 # [3.0.0](https://github.com/tmux-revamped/tmux-time-revamped/compare/v2.0.0...v3.0.0) (2026-11-18)
 
 
