@@ -1,0 +1,90 @@
+#compdef time-revamped
+
+_time_revamped() {
+  local context state state_descr line
+  typeset -A opt_args
+  local -a commands
+  commands=(
+    'apply:bind the keys and fill the status placeholders'
+    'list:print every command apply would send'
+    'status:print one placeholder'
+    'card:print every figure as a table'
+    'menu:open the world clock menu'
+    'calendar:open the calendar in a tmux popup'
+    'copy:copy the time as iso or epoch'
+    'mark:set the stopwatch mark'
+    'toggle-format:switch between 12 and 24 hour time'
+    'daemon:publish the placeholders on every tick'
+    'doctor:check this machine'
+    'version:print the version'
+    'help:print the help page'
+  )
+
+  _arguments \
+    '--json[list prints one JSON object]' \
+    '--theme[colours of the terminal interface]:theme:(kodougu catppuccin-mocha catppuccin-latte dracula nord gruvbox tokyo-night mono)' \
+    '--menu-key[prefix key of the world clock menu, or off]:value:' \
+    '--calendar-key[prefix key of the calendar popup, or off]:value:' \
+    '--copy-key[prefix key that copies the ISO time, or off]:value:' \
+    '--mark-key[prefix key that sets the stopwatch mark, or off]:value:' \
+    '--date-format[format of the date]:value:(YMD MD DM MDY DMY hide)' \
+    '--time-format[format of every clock]:value:(24H 12H hide)' \
+    '--timezones[world clock zones separated by commas or spaces]:value:' \
+    '--compact[1 prints short city labels]:value:(0 1)' \
+    '--zone-labels[labels matched to the zones by position]:value:' \
+    '--zone-separator[text between the world clocks]:value:' \
+    '--weekend-override[0 keeps the time of day colour on weekends]:value:(0 1)' \
+    '--local-label[fixed label of the local clock]:value:' \
+    '--local-source[where the local place name comes from]:value:(timezone geoip)' \
+    '--geoip-endpoint[URL that answers with the city]:value:' \
+    '--geoip-interval[minutes between geoip requests]:value:' \
+    '--morning-color[style of hours 05 to 12]:value:' \
+    '--day-color[style of hours 12 to 14]:value:' \
+    '--afternoon-color[style of hours 14 to 18]:value:' \
+    '--evening-color[style of hours 18 to 22]:value:' \
+    '--night-color[style of hours 22 to 05]:value:' \
+    '--weekend-color[style of Saturday and Sunday]:value:' \
+    '--sunrise-icon[glyph for hours 05 to 08]:value:' \
+    '--morning-icon[glyph for hours 08 to 12]:value:' \
+    '--day-icon[glyph for hours 12 to 14]:value:' \
+    '--afternoon-icon[glyph for hours 14 to 18]:value:' \
+    '--sunset-icon[glyph for hours 18 to 20]:value:' \
+    '--evening-icon[glyph for hours 20 to 22]:value:' \
+    '--night-icon[glyph for hours 22 to 05]:value:' \
+    '--weekend-icon[glyph for Saturday and Sunday]:value:' \
+    '--icon-position[where the glyph goes in an entry]:value:(middle before)' \
+    '--reset[style written after each entry]:value:' \
+    '--relative-day[1 adds a +1d or -1d badge]:value:(0 1)' \
+    '--work-hours[1 dims a zone outside working hours]:value:(0 1)' \
+    '--work-start[first working hour]:value:' \
+    '--work-end[hour working time ends]:value:' \
+    '--dim-style[style of a zone outside working hours, or none]:value:' \
+    '--primary[zero-based index of the zone to highlight]:value:' \
+    '--primary-style[style of the primary zone, or none]:value:' \
+    '--countdown-target[target of the countdown, YYYY-MM-DD or YYYY-MM-DD HH:MM]:value:' \
+    '--countdown-label[text before the countdown]:value:' \
+    '--countdown-done[text once the target has passed]:value:' \
+    '--dst-zone[zone the clock change warning watches]:value:' \
+    '--dst-horizon[days ahead the warning looks]:value:' \
+    '--dst-label[text before the day count]:value:' \
+    '--overlap-label[text before the overlap window]:value:' \
+    '--overlap-none[text when no hour is shared]:value:' \
+    '--render[jobs or options]:value:(jobs options)' \
+    '--interval[seconds between publishes in render mode, or minute]:value:' \
+    '1:command:->command' \
+    '2:name:->name'
+
+  case "${state}" in
+  command)
+    _describe 'command' commands
+    ;;
+  name)
+    case "${line[1]}" in
+    status) _values 'placeholder' datetime date clock zones local until elapsed epoch iso offset week doy dst overlap ;;
+    copy) _values 'kind' iso epoch ;;
+    esac
+    ;;
+  esac
+}
+
+_time_revamped "$@"

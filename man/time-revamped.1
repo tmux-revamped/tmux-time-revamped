@@ -1,0 +1,311 @@
+.TH TIME-REVAMPED 1 "2026-11-19" "time-revamped" "User Commands"
+.SH NAME
+time-revamped \- local and world clocks in the tmux status bar
+.SH SYNOPSIS
+.B time-revamped
+.RI [ options ]
+.I command
+.RI [ name ]
+.SH DESCRIPTION
+.B time-revamped
+shows the local date and time, any number of world clocks, a countdown, a
+stopwatch, a clock change warning and the working hours every configured
+zone shares in the tmux status line. Each world clock is coloured by the
+hour at that place. Every clock comes from the system date and the
+timezone database, with no network call unless geoip is on.
+.PP
+The entry point
+.B time-revamped.tmux
+runs
+.B apply
+once when tmux loads the plugin, which binds the menu key in one tmux call
+and replaces the placeholders #{time}, #{time_date}, #{time_clock},
+#{time_zones}, #{time_local}, #{time_until}, #{time_elapsed}, #{time_epoch},
+#{time_iso}, #{time_offset}, #{time_week}, #{time_doy}, #{time_dst} and
+#{time_overlap} in status-left and status-right.
+.PP
+In the jobs render mode each placeholder runs
+.B status
+on every status redraw, which reads the clock once. In the options render
+mode one background process renders every clock the status line uses, by default
+once a minute, one second after the minute changes, and writes them in one tmux
+call. Run with no command on a terminal, the tool offers a menu.
+.PP
+The clock change and overlap checks run date with \-d on GNU, uutils and
+BusyBox and with \-r on BSD, detected once per process. Dates are printed
+under the C locale.
+.SH COMMANDS
+.TP
+.B apply
+Bind the keys and replace the status placeholders now. In the options render mode it also starts the daemon.
+.TP
+.B list
+Print every tmux command apply would send, one per line, and change nothing.
+.TP
+.B status
+Print one placeholder: datetime, date, clock, zones, local, until, elapsed, epoch, iso, offset, week, doy, dst, overlap. The status line runs it. The placeholder #{time} prints datetime.
+.TP
+.B card
+Read everything now and print one row per figure.
+.TP
+.B menu
+Open the world clock menu on the current client. The menu key opens the same menu.
+.TP
+.B calendar
+Open cal in a tmux popup that stays until a key is pressed. A tmux older than 3.2 says so.
+.TP
+.B copy
+Copy the time to the tmux buffer and the system clipboard, as iso, the default, or as epoch, and say what was copied.
+.TP
+.B mark
+Set the stopwatch mark that #{time_elapsed} counts from.
+.TP
+.B toggle-format
+Switch @time_revamped_time_format between 24H and 12H.
+.TP
+.B daemon
+Render and publish every placeholder the status line uses, by default once a minute, until another daemon takes over or the tmux server ends. apply starts it in the options render mode.
+.TP
+.B doctor
+Print one row per dependency: tmux, the popup, the core tools, cal, the clipboard tool, curl, the zone database, the configured zones, the settings, the keys it found bound and gum.
+A settings row names any setting whose value it does not know.
+Exits 1 only when a required tool is missing.
+.TP
+.B version
+Print the version, then the tmux version.
+.TP
+.B help
+Print the help page.
+.SH OPTIONS
+.TP
+.B \-\-json
+.B list
+prints one JSON object.
+.TP
+.BI \-\-theme " name"
+Colours of the terminal interface:
+.BR kodougu,
+.BR catppuccin\-mocha,
+.BR catppuccin\-latte,
+.BR dracula,
+.BR nord,
+.BR gruvbox,
+.B tokyo\-night
+or
+.BR mono .
+The default is
+.BR kodougu .
+.TP
+.BI \-\- setting " value"
+Any tmux option below, named with dashes, such as
+.B \-\-timezones
+or
+.BR \-\-work\-start .
+It also takes the form
+.IR \-\-setting = value ,
+and outranks the environment and the tmux option. Given to
+.BR apply ,
+it rides on the keys and on every status call.
+.SH ENVIRONMENT
+.TP
+.BI TIME_REVAMPED_ SETTING
+Any tmux option below in capitals, such as
+.BR TIME_REVAMPED_TIMEZONES .
+It outranks the tmux option.
+.TP
+.B TIME_REVAMPED_THEME
+The theme when
+.B \-\-theme
+is not given.
+.TP
+.B TIME_REVAMPED_ACCENT
+A colour such as #CBA6F7 that replaces the accent of the theme.
+.TP
+.B KODOUGU_THEME
+The theme of every kodougu and tmux-revamped tool, when neither
+.B \-\-theme
+nor
+.B TIME_REVAMPED_THEME
+is set.
+.TP
+.B KODOUGU_ACCENT
+The accent of every kodougu and tmux-revamped tool, when
+.B TIME_REVAMPED_ACCENT
+is not set.
+.TP
+.B NO_COLOR
+Turns colour off in every theme.
+.SH TMUX OPTIONS
+An empty tmux option means its default. A key set to off binds nothing.
+.TP
+.B @time_revamped_menu_key
+Prefix key of the world clock menu, or off. The default is M-t, left alone when someone else holds it.
+.TP
+.B @time_revamped_calendar_key
+Prefix key of the calendar popup, or off. The default is off.
+.TP
+.B @time_revamped_copy_key
+Prefix key that copies the ISO time, or off. The default is off.
+.TP
+.B @time_revamped_mark_key
+Prefix key that sets the stopwatch mark, or off. The default is off.
+.TP
+.B @time_revamped_date_format
+Format of the date: YMD, MD, DM, MDY, DMY, hide. The default is YMD.
+.TP
+.B @time_revamped_time_format
+Format of every clock: 24H, 12H, hide. The default is 24H.
+.TP
+.B @time_revamped_timezones
+World clock zones separated by commas or spaces. The default is none.
+.TP
+.B @time_revamped_compact
+1 prints short city labels: 0, 1. The default is 0.
+.TP
+.B @time_revamped_zone_labels
+Labels matched to the zones by position. The default is none.
+.TP
+.B @time_revamped_zone_separator
+Text between the world clocks. The default is a space.
+.TP
+.B @time_revamped_weekend_override
+0 keeps the time of day colour on weekends: 0, 1. The default is 1.
+.TP
+.B @time_revamped_local_label
+Fixed label of the local clock. The default is none.
+.TP
+.B @time_revamped_local_source
+Where the local place name comes from: timezone, geoip. The default is timezone.
+.TP
+.B @time_revamped_geoip_endpoint
+URL that answers with the city. The default is https://ipinfo.io/city.
+.TP
+.B @time_revamped_geoip_interval
+Minutes between geoip requests. The default is 30.
+.TP
+.B @time_revamped_morning_color
+Style of hours 05 to 12. The default is #[fg=yellow].
+.TP
+.B @time_revamped_day_color
+Style of hours 12 to 14. The default is #[fg=green].
+.TP
+.B @time_revamped_afternoon_color
+Style of hours 14 to 18. The default is #[fg=cyan].
+.TP
+.B @time_revamped_evening_color
+Style of hours 18 to 22. The default is #[fg=magenta].
+.TP
+.B @time_revamped_night_color
+Style of hours 22 to 05. The default is #[fg=blue].
+.TP
+.B @time_revamped_weekend_color
+Style of Saturday and Sunday. The default is #[fg=brightblack].
+.TP
+.B @time_revamped_sunrise_icon
+Glyph for hours 05 to 08. The default is none.
+.TP
+.B @time_revamped_morning_icon
+Glyph for hours 08 to 12. The default is none.
+.TP
+.B @time_revamped_day_icon
+Glyph for hours 12 to 14. The default is none.
+.TP
+.B @time_revamped_afternoon_icon
+Glyph for hours 14 to 18. The default is none.
+.TP
+.B @time_revamped_sunset_icon
+Glyph for hours 18 to 20. The default is none.
+.TP
+.B @time_revamped_evening_icon
+Glyph for hours 20 to 22. The default is none.
+.TP
+.B @time_revamped_night_icon
+Glyph for hours 22 to 05. The default is none.
+.TP
+.B @time_revamped_weekend_icon
+Glyph for Saturday and Sunday. The default is none.
+.TP
+.B @time_revamped_icon_position
+Where the glyph goes in an entry: middle, before. The default is middle.
+.TP
+.B @time_revamped_reset
+Style written after each entry. The default is #[default].
+.TP
+.B @time_revamped_relative_day
+1 adds a +1d or -1d badge: 0, 1. The default is 0.
+.TP
+.B @time_revamped_work_hours
+1 dims a zone outside working hours: 0, 1. The default is 0.
+.TP
+.B @time_revamped_work_start
+First working hour. The default is 9.
+.TP
+.B @time_revamped_work_end
+Hour working time ends. The default is 17.
+.TP
+.B @time_revamped_dim_style
+Style of a zone outside working hours, or none. The default is #[dim].
+.TP
+.B @time_revamped_primary
+Zero-based index of the zone to highlight. The default is none.
+.TP
+.B @time_revamped_primary_style
+Style of the primary zone, or none. The default is #[bold].
+.TP
+.B @time_revamped_countdown_target
+Target of the countdown, YYYY-MM-DD or YYYY-MM-DD HH:MM. The default is none.
+.TP
+.B @time_revamped_countdown_label
+Text before the countdown. The default is none.
+.TP
+.B @time_revamped_countdown_done
+Text once the target has passed. The default is now.
+.TP
+.B @time_revamped_dst_zone
+Zone the clock change warning watches. The default is the local zone.
+.TP
+.B @time_revamped_dst_horizon
+Days ahead the warning looks. The default is 14.
+.TP
+.B @time_revamped_dst_label
+Text before the day count. The default is DST.
+.TP
+.B @time_revamped_overlap_label
+Text before the overlap window. The default is overlap.
+.TP
+.B @time_revamped_overlap_none
+Text when no hour is shared. The default is no overlap.
+.TP
+.B @time_revamped_render
+Jobs or options: jobs, options. The default is jobs.
+.TP
+.B @time_revamped_interval
+Seconds between publishes in render mode, or minute. The default is minute.
+.SH STATE
+The plugin keeps these tmux options itself.
+.TP
+.B @time_revamped_mark_epoch
+The unix time of the last stopwatch mark.
+.TP
+.B @time_revamped_published
+The placeholders the status line uses, recorded by apply.
+.TP
+.B @time_revamped_out_<name>
+Each rendered value in the options render mode.
+.TP
+.B @time_revamped_ticker_pid
+The process that owns the options render mode.
+.TP
+.B @time_revamped_geoip_city
+The last city geoip gave, with _ts and _lock companions.
+.SH EXAMPLES
+.nf
+time-revamped status zones
+time-revamped card
+time-revamped \-\-timezones "Asia/Tokyo, Europe/London" status zones
+time-revamped list \-\-json
+.fi
+.SH FILES
+Nothing is written outside tmux options.
+.SH SEE ALSO
+tmux(1), date(1), cal(1)

@@ -1,0 +1,5 @@
+$ time-revamped list
+bind-key -N World clock menu M-t display-menu -T time-revamped Toggle 12<path> h run-shell "'<path> toggle-format" Calendar c run-shell "'<path> calendar" Copy ISO i run-shell "'<path> copy iso" Copy epoch e run-shell "'<path> copy epoch" Set mark m run-shell "'<path> mark" Doctor d run-shell "'<path> doctor"
+set-option -gq status-right #('<path> status datetime) #('<path> status zones)
+set-option -gq @time_revamped_published datetime zones
+exit 0

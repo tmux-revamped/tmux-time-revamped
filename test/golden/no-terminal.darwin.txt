@@ -1,0 +1,3 @@
+$ time-revamped
+time-revamped: no command given. run 'time-revamped help' for usage.
+exit 1

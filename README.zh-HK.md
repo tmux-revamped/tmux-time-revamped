@@ -2,33 +2,94 @@
 
 # tmux-time-revamped
 
-<strong>狀態列中的本地時鐘和世界時鐘，按一天中的時段著色，並提供倒數和夏令時間提示。</strong>
+<strong>在 tmux 狀態列顯示本地時鐘和世界時鐘，按時段着色，並設有倒數和夏令時間提示。</strong>
 
-[English](README.md) | [日本語](README.ja.md) | [简体中文](README.zh-Hans.md) | 繁體中文（香港）
+[English](README.md) &nbsp;|&nbsp; [日本語](README.ja.md) &nbsp;|&nbsp; [简体中文](README.zh-Hans.md) &nbsp;|&nbsp; 繁體中文（香港）
 
-[![family](https://img.shields.io/github/actions/workflow/status/tmux-revamped/tmux-time-revamped/family.yml?branch=main&style=flat-square&label=family)](https://github.com/tmux-revamped/tmux-time-revamped/actions/workflows/family.yml)
-[![tests](https://img.shields.io/github/actions/workflow/status/tmux-revamped/tmux-time-revamped/tests.yml?branch=main&style=flat-square&label=tests)](https://github.com/tmux-revamped/tmux-time-revamped/actions/workflows/tests.yml)
+[![ci](https://img.shields.io/github/actions/workflow/status/tmux-revamped/tmux-time-revamped/ci.yml?branch=main&style=flat-square&label=ci)](https://github.com/tmux-revamped/tmux-time-revamped/actions/workflows/ci.yml)
 [![release](https://img.shields.io/github/v/release/tmux-revamped/tmux-time-revamped?style=flat-square&label=release)](https://github.com/tmux-revamped/tmux-time-revamped/releases/latest)
 [![openssf scorecard](https://img.shields.io/ossf-scorecard/github.com/tmux-revamped/tmux-time-revamped?style=flat-square&label=openssf%20scorecard)](https://scorecard.dev/viewer/?uri=github.com/tmux-revamped/tmux-time-revamped)
 [![license](https://img.shields.io/github/license/tmux-revamped/tmux-time-revamped?style=flat-square&label=license)](LICENSE)
 
 <p align="center">
-  <a href="#功能">功能</a> |
-  <a href="#系統要求">系統要求</a> |
-  <a href="#安裝">安裝</a> |
-  <a href="#用法">用法</a> |
-  <a href="#設定">設定</a> |
-  <a href="#快捷鍵">快捷鍵</a> |
-  <a href="#運作原理">運作原理</a>
+  <a href="#快速開始"><strong>快速開始</strong></a> &nbsp;|&nbsp;
+  <a href="#用法">用法</a> &nbsp;|&nbsp;
+  <a href="#運作原理">運作原理</a> &nbsp;|&nbsp;
+  <a href="#截圖">截圖</a>
 </p>
 
 </div>
 
-**14** 個狀態佔位符。**4** 個操作，其中 **1** 個預設綁定。所有時鐘都來自系統的 `date` 和時區資料庫，除非開啟 geoip，否則不會連接網絡。
+<p align="center">
+  <img src="screens/hero.gif" alt="time-revamped 顯示日期、時間和按小時着色的三個世界時鐘，並示範世界時鐘選單、12 小時制、日曆、秒錶和 options 渲染模式" width="800">
+</p>
+
+```console
+$ time-revamped --timezones "Europe/London, Asia/Tokyo" card
+Time           2026-11-19 13:02
+ISO            2026-11-19T13:02:54-05:00
+Epoch          1795111374
+Offset         UTC-05:00
+Week           47
+Day of year    323
+Local          New York 13:02
+Zones          GMT 18:02 JST 03:02
+Countdown      -
+Stopwatch      -
+Clock change   -
+Overlap        overlap no overlap
+Read. It is 2026-11-19T13:02:54-05:00.
+```
+
+**14** 個佔位符，**2** 種渲染模式，支援 macOS 和 Linux，需要 tmux **3.2** 或更高版本。
 
 ---
 
-## 功能
+## 快速開始
+
+### 前提條件
+
+| 工具 | 版本 | 用途 |
+|:-----|:--------|:---------|
+| tmux | 3.2 或更高 | 家族的最低版本，以及日曆彈出視窗 |
+| `date` 與時區資料庫 | 系統內置 | 所有時鐘，支援 GNU、uutils、BusyBox 和 BSD 的 `date` |
+| `cal` | 系統內置 | 日曆彈出視窗 |
+| `curl` | 選用 | geoip 地點標籤 |
+| `pbcopy`、`wl-copy` 或 `xclip` | 選用 | 把時間戳複製到系統剪貼簿 |
+| gum | 選用 | `time-revamped` 的選單、表格和顏色；沒有它時所有指令輸出純文字 |
+
+它在 Linux 和 macOS 上運行，可使用 BSD、GNU、uutils 或 BusyBox 工具。缺少選用工具時，對應功能保持靜默，`time-revamped doctor` 會指出它。
+
+### 安裝
+
+使用 [TPM](https://github.com/tmux-plugins/tpm)，把插件加入 `~/.tmux.conf`，然後按 `prefix + I`：
+
+```tmux
+set -g @plugin 'tmux-revamped/tmux-time-revamped'
+set -g status-right '#{time} #{time_zones}'
+```
+
+手動安裝時，複製儲存庫並在 `~/.tmux.conf` 中執行入口腳本：
+
+```bash
+git clone https://github.com/tmux-revamped/tmux-time-revamped ~/.tmux/plugins/tmux-time-revamped
+```
+
+```tmux
+run-shell ~/.tmux/plugins/tmux-time-revamped/time-revamped.tmux
+```
+
+請在插件載入之前設定 `status-left` 或 `status-right`。插件在載入時只取代一次它在那裏找到的佔位符。
+
+在複製的目錄中執行 `make install`，還會把 `time-revamped` 放入 `~/.local/bin`，把 man 手冊和補全放入 `~/.local/share`。
+
+### 驗證
+
+```bash
+~/.tmux/plugins/tmux-time-revamped/bin/time-revamped doctor
+```
+
+## 用法
 
 本插件把 `status-left` 和 `status-right` 中的佔位符取代為本地日期和時間、任何數量的世界時鐘，以及一些開發和日曆用的欄位。每個世界時鐘按當地的鐘點著色，一眼便看出誰在早上、誰在睡覺。
 
@@ -48,40 +109,6 @@
 | `#{time_doy}` | 一年中的第幾天 |
 | `#{time_dst}` | 時鐘調整在範圍內時顯示 `DST in 3d` |
 | `#{time_overlap}` | 所有已設定時區共有的工作時段，以本地時間顯示 |
-
-## 系統要求
-
-| 工具 | 版本 | 用途 |
-|:-----|:--------|:---------|
-| tmux | 3.2 或以上 | 日曆彈出視窗使用 `display-popup` |
-| bash | 3.2 或以上 | 可使用 macOS 的 `/bin/bash` |
-| `date` 和時區資料庫 | 系統內置 | 所有時鐘，支援 GNU 和 BSD 的 `date` |
-| `cal` | 系統內置 | 日曆彈出視窗 |
-| `curl` | 可選 | geoip 地點標籤 |
-| `pbcopy`、`wl-copy` 或 `xclip` | 可選 | 把時間戳記複製到系統剪貼簿 |
-
-CI 在 Ubuntu LTS 的 x86_64 和 arm64 上使用 GNU 和 uutils coreutils 執行測試，在 macOS 的 Apple Silicon 和 Intel 上使用系統工具、GNU 工具和 uutils 執行測試。
-
-## 安裝
-
-使用 [TPM](https://github.com/tmux-plugins/tpm) 時，把插件和一個佔位符加入 `~/.tmux.conf`，然後按 `prefix + I`：
-
-```tmux
-set -g @plugin 'tmux-revamped/tmux-time-revamped'
-set -g status-right '#{time}'
-```
-
-不使用 TPM 時，複製儲存庫，並在設定 `status-right` 之後執行入口腳本：
-
-```bash
-git clone https://github.com/tmux-revamped/tmux-time-revamped ~/.tmux/plugins/tmux-time-revamped
-```
-
-```tmux
-run-shell ~/.tmux/plugins/tmux-time-revamped/time-revamped.tmux
-```
-
-## 用法
 
 ```tmux
 set -g @time_revamped_timezones 'America/New_York, Europe/London, Asia/Tokyo'
@@ -118,13 +145,32 @@ set -g status-right '#{time} #{time_zones}'
 
 ### 渲染模式
 
-預設情況下每個佔位符都變成一個 `#()` 呼叫，tmux 每次重繪狀態列都會重新執行它。把 `@time_revamped_render` 設為 `options` 後，每個佔位符變成對選項的讀取，例如 `#{E:@time_revamped_out_local}`。每部伺服器上的一個背景進程會在每分鐘轉換後一秒繪製狀態列用到的所有時鐘，每分鐘一次，並以一次 tmux 呼叫寫入，因此所有時鐘同時轉變。
+預設情況下每個佔位符都變成一個 `#()` 呼叫，tmux 每次重繪狀態列都會重新執行它。把 `@time_revamped_render` 設為 `options` 後，每個佔位符變成對選項的讀取，例如 `#{E:@time_revamped_out_local}`。每部伺服器上的一個背景進程預設會在每分鐘轉換後一秒繪製狀態列用到的所有時鐘，每分鐘一次，並以一次 tmux 呼叫寫入，因此所有時鐘同時轉變。
 
 ```tmux
 set -g @time_revamped_render 'options'
 ```
 
+| 指令 | 作用 |
+|:--------|:-------------|
+| `time-revamped apply` | 立即綁定按鍵並取代佔位符；入口腳本在 tmux 載入插件時執行它 |
+| `time-revamped list` | 列出 `apply` 會發送的每條指令，不作任何更改；`--json` 輸出一個物件 |
+| `time-revamped status NAME` | 輸出一個佔位符，例如 `zones`、`iso` 或 `until`；狀態列執行它 |
+| `time-revamped card` | 立即讀取所有數值，每個數值輸出一行 |
+| `time-revamped menu` | 在目前的客戶端開啟世界時鐘選單 |
+| `time-revamped calendar` | 在 tmux 彈出視窗中開啟 `cal`，直至按鍵才關閉 |
+| `time-revamped copy [KIND]` | 把時間按 `iso` 或 `epoch` 複製到 tmux 緩衝區和系統剪貼簿 |
+| `time-revamped mark` | 設定 `#{time_elapsed}` 開始計時的秒錶標記 |
+| `time-revamped toggle-format` | 在 12 小時制和 24 小時制之間切換 |
+| `time-revamped daemon` | 為 `options` 渲染模式每分鐘發佈一次佔位符；`apply` 會啟動它 |
+| `time-revamped doctor` | 每個依賴一行，已設定的時區、設定，以及被讓開的按鍵 |
+| `time-revamped version` | 版本號，然後是 tmux 版本 |
+| `time-revamped help` | 說明頁；`man time-revamped` 說明相同的指令和設定 |
+| `time-revamped` | 在終端機中是一個選單 |
+
 ## 設定
+
+每個選項也可以用帶短橫線的指令選項指定，例如 `--timezones 'Asia/Tokyo'`，也可以用環境變數指定，例如 `TIME_REVAMPED_TIMEZONES`；指令列優先於環境變數，環境變數優先於 tmux 選項。空的 tmux 選項表示使用預設值。`doctor` 會指出持有插件不認識的值的設定。傳給 `apply` 的設定會帶到每個按鍵和每次狀態呼叫上。
 
 | 選項 | 預設值 | 意思 |
 |:-------|:--------|:--------|
@@ -163,7 +209,7 @@ set -g @time_revamped_render 'options'
 | `@time_revamped_dst_label` | `DST` | 天數前的文字 |
 | `@time_revamped_overlap_label` | `overlap` | 重疊時段前的文字 |
 | `@time_revamped_overlap_none` | `no overlap` | 沒有共同時段時的文字 |
-| `@time_revamped_render` | 空 | 設為 `options` 開啟渲染模式 |
+| `@time_revamped_render` | `jobs` | `options` 開啟渲染模式；其他任何值都表示 `jobs` |
 | `@time_revamped_interval` | `minute` | 渲染模式的節奏：`minute` 或秒數。其他值依次退回 `status-interval`，再退回 5 秒 |
 | `@time_revamped_menu_key` | `M-t` | 開啟操作選單的前綴鍵。`off` 表示不綁定 |
 | `@time_revamped_calendar_key` | `off` | 日曆彈出視窗的前綴鍵 |
@@ -177,11 +223,11 @@ set -g @time_revamped_render 'options'
 
 ```tmux
 # Catppuccin Mocha
-set -g @time_revamped_morning_color '#[fg=#f9e2af]'
-set -g @time_revamped_day_color '#[fg=#a6e3a1]'
-set -g @time_revamped_afternoon_color '#[fg=#94e2d5]'
-set -g @time_revamped_evening_color '#[fg=#cba6f7]'
-set -g @time_revamped_night_color '#[fg=#89b4fa]'
+set -g @time_revamped_morning_color '#[fg=#ff8700]'
+set -g @time_revamped_day_color '#[fg=#5fd700]'
+set -g @time_revamped_afternoon_color '#[fg=#00afff]'
+set -g @time_revamped_evening_color '#[fg=#ff5f87]'
+set -g @time_revamped_night_color '#[fg=#8787ff]'
 set -g @time_revamped_weekend_color '#[fg=#a6adc8]'
 
 # Dracula
@@ -237,45 +283,184 @@ set -g @time_revamped_weekend_color '#[fg=#586e75]'
 | `@time_revamped_published` | 狀態列用到的佔位符，在載入時記錄，令渲染模式只發佈這些 |
 | `@time_revamped_out_<name>` | 渲染模式下繪製出的每個值 |
 | `@time_revamped_ticker_pid` | 負責渲染模式的進程。重新載入會把擁有權交給新進程，舊進程隨即結束 |
-| `@time_revamped_option_names` | 渲染模式每次執行時以一次 tmux 呼叫讀取的選項 |
 | `@time_revamped_geoip_city` | geoip 取得的最後一個城市，並附有表示其時效和進行中請求的 `_ts` 與 `_lock` |
 
 ## 快捷鍵
 
 | 按鍵 | 選項 | 動作 |
 |:----|:-------|:-------|
-| `prefix + M-t` | `@time_revamped_menu_key` | 開啟操作選單 |
-| 不綁定 | `@time_revamped_calendar_key` | 日曆彈出視窗 |
-| 不綁定 | `@time_revamped_copy_key` | 複製 ISO 時間戳記 |
-| 不綁定 | `@time_revamped_mark_key` | 設定秒錶標記 |
+| `prefix + M-t` | `@time_revamped_menu_key` | 開啟世界時鐘選單 |
+| 未綁定 | `@time_revamped_calendar_key` | 日曆彈出視窗 |
+| 未綁定 | `@time_revamped_copy_key` | 複製 ISO 時間 |
+| 未綁定 | `@time_revamped_mark_key` | 設定秒錶標記 |
 
-選單有六項：`h` 切換 12 小時和 24 小時制，`c` 開啟日曆，`i` 和 `e` 把時間以 ISO 8601 或 Unix 秒數複製到 tmux 緩衝區和系統剪貼簿，`m` 設定秒錶標記，`d` 執行診斷，把每個已設定的時區名稱與 `/usr/share/zoneinfo` 核對。把 `@time_revamped_menu_key` 設為 `T` 可還原 2.0.0 之前使用的按鍵。
+選單有六項：`h` 切換 12 小時制和 24 小時制，`c` 開啟日曆，`i` 和 `e` 把時間按 ISO 8601 或 Unix 秒複製到 tmux 緩衝區和系統剪貼簿，`m` 設定秒錶標記，`d` 執行 `time-revamped doctor`。預設按鍵如果已被其他綁定佔用就保持不動，`doctor` 會指出。設為 `off` 的按鍵不綁定任何東西。
 
 ## 運作原理
 
-```mermaid
-graph LR
-    Entry[time-revamped.tmux] -->|改寫| Status[status-left 和 status-right]
-    Status -->|預設模式| Call[呼叫 src/time.sh 的 shell 指令]
-    Status -->|渲染模式| Option[讀取選項]
-    Daemon[背景進程] -->|每分鐘一次| Option
-    Call --> Date[date]
-    Daemon --> Date
-```
+[`time-revamped.tmux`](time-revamped.tmux) 在 tmux 載入插件時執行一次。它把 `status-left` 和 `status-right` 使用的佔位符記錄到 `@time_revamped_published`，綁定按鍵，然後把每個佔位符取代為對 [`bin/time-revamped`](bin/time-revamped) 的呼叫，在 `options` 模式下則取代為選項讀取，並啟動背景程序。
 
-載入時，[`time-revamped.tmux`](time-revamped.tmux) 把狀態列中的每個佔位符取代為對 [`src/time.sh`](src/time.sh) 的呼叫，或在渲染模式下取代為對選項的讀取，並綁定按鍵。讀取時鐘只需一次 `date` 呼叫，因此預設的 `#()` 模式會即時返回。在渲染模式下，入口腳本啟動一個背景進程，它佔用 `@time_revamped_ticker_pid`，每次執行時繪製要發佈的時鐘，並在另一個進程佔用該選項或伺服器消失時停止。
+預設模式下，每次 `#()` 呼叫讀取一次時鐘並輸出。`options` 模式下，每個伺服器一個背景程序佔用 `@time_revamped_ticker_pid`，預設每分鐘、在分鐘變化一秒之後渲染狀態列用到的全部佔位符，並透過一次 tmux 呼叫寫入，所以各時鐘同時變化。當另一個程序佔用該選項或伺服器結束時，它停止。
 
-夏令時間和重疊時段的檢查在 GNU 上用 `-d`、在 BSD 上用 `-r` 執行 `date`，每個進程只判斷一次。倒數、秒錶、相對日期和重疊時段都是 bash 的整數運算。
+每次 `date` 呼叫都在 C 區域設定下執行。夏令時間和重疊檢查在 GNU、uutils 和 BusyBox 上用 `-d` 執行 `date`，在 BSD 上用 `-r`，每個程序偵測一次。倒數、秒錶和相對日期是 shell 中的整數運算。讀取、數值和按鍵綁定在 [`lib/time.sh`](lib/time.sh) 中，設定表在 [`lib/state.sh`](lib/state.sh) 中。
+
+<a id="截圖"></a>
+
+## 截圖
+
+<details>
+<summary>全部截圖，在真實的 tmux 中用 <code>make screens</code> 錄製，每個按鍵都顯示在狀態列上</summary>
+<br>
+
+<table>
+<tr>
+<td width="50%" valign="top"><img src="screens/status.png" alt="time-revamped: 日期、時間和三個世界時鐘，按小時着色"><br><sub>日期、時間和三個世界時鐘，按小時着色（<code>hero.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/menu.png" alt="time-revamped: prefix M-t 開啟世界時鐘選單"><br><sub><code>prefix M-t</code> 開啟世界時鐘選單（<code>hero.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/twelve.png" alt="time-revamped: 選單中的 h 切換至 12 小時制"><br><sub>選單中的 <code>h</code> 切換至 12 小時制（<code>hero.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/calendar.png" alt="time-revamped: 選單中的 c 開啟日曆"><br><sub>選單中的 <code>c</code> 開啟日曆（<code>hero.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/copy.png" alt="time-revamped: 選單中的 i 複製 ISO 時間"><br><sub>選單中的 <code>i</code> 複製 ISO 時間（<code>hero.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/calendar-key.png" alt="time-revamped: @time_revamped_calendar_key 為日曆指定專用按鍵"><br><sub><code>@time_revamped_calendar_key</code> 為日曆指定專用按鍵（<code>hero.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/copy-key.png" alt="time-revamped: @time_revamped_copy_key 為複製 ISO 時間指定專用按鍵"><br><sub><code>@time_revamped_copy_key</code> 為複製 ISO 時間指定專用按鍵（<code>hero.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/mark-key.png" alt="time-revamped: @time_revamped_mark_key 設定秒錶標記"><br><sub><code>@time_revamped_mark_key</code> 設定秒錶標記（<code>hero.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/mark.png" alt="time-revamped: #{time_elapsed} 從標記開始計時"><br><sub><code>#{time_elapsed}</code> 從標記開始計時（<code>hero.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/options.png" alt="time-revamped: 在 options 渲染模式下，每個佔位符讀取一個 tmux 選項"><br><sub>在 <code>options</code> 渲染模式下，每個佔位符讀取一個 tmux 選項（<code>hero.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/formats.png" alt="time-revamped: @time_revamped_date_format 和 @time_revamped_time_format 決定日期和時間的格式"><br><sub><code>@time_revamped_date_format</code> 和 <code>@time_revamped_time_format</code> 決定日期和時間的格式（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/hide.png" alt="time-revamped: hide 去掉 #{time_date} 和 #{time_clock} 的日期和時間"><br><sub><code>hide</code> 去掉 <code>#{time_date}</code> 和 <code>#{time_clock}</code> 的日期和時間（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/compact.png" alt="time-revamped: @time_revamped_compact 輸出簡短的城市標籤"><br><sub><code>@time_revamped_compact</code> 輸出簡短的城市標籤（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/labels.png" alt="time-revamped: @time_revamped_zone_labels 和 @time_revamped_zone_separator 為時鐘命名並分隔"><br><sub><code>@time_revamped_zone_labels</code> 和 <code>@time_revamped_zone_separator</code> 為時鐘命名並分隔（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/periods.png" alt="time-revamped: 夜晚、早晨、白天、下午和傍晚各有一種顏色"><br><sub>夜晚、早晨、白天、下午和傍晚各有一種顏色（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/weekend.png" alt="time-revamped: 星期六和星期日使用週末顏色"><br><sub>星期六和星期日使用週末顏色（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/weekend-override.png" alt="time-revamped: @time_revamped_weekend_override 設為 0 時，週末仍使用時段顏色"><br><sub><code>@time_revamped_weekend_override</code> 設為 <code>0</code> 時，週末仍使用時段顏色（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/colors.png" alt="time-revamped: 各時段的顏色可使用任意樣式，這裏是十六進制顏色"><br><sub>各時段的顏色可使用任意樣式，這裏是十六進制顏色（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/icons.png" alt="time-revamped: 每個時段都有圖示選項，這裏各用一個字母"><br><sub>每個時段都有圖示選項，這裏各用一個字母（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/icon-position.png" alt="time-revamped: @time_revamped_icon_position 設為 before 時，圖示放在最前面"><br><sub><code>@time_revamped_icon_position</code> 設為 <code>before</code> 時，圖示放在最前面（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/relative-day.png" alt="time-revamped: @time_revamped_relative_day 為處於翌日的時區加上 +1d 標記"><br><sub><code>@time_revamped_relative_day</code> 為處於翌日的時區加上 <code>+1d</code> 標記（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/relative-day-back.png" alt="time-revamped: 前一天的時區上，同一標記顯示為 -1d"><br><sub>前一天的時區上，同一標記顯示為 <code>-1d</code>（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/work-hours.png" alt="time-revamped: @time_revamped_work_hours 讓工作時間之外的時區變暗"><br><sub><code>@time_revamped_work_hours</code> 讓工作時間之外的時區變暗（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/dim-style.png" alt="time-revamped: @time_revamped_work_start、@time_revamped_work_end 和 @time_revamped_dim_style 調整時段和變暗樣式"><br><sub><code>@time_revamped_work_start</code>、<code>@time_revamped_work_end</code> 和 <code>@time_revamped_dim_style</code> 調整時段和變暗樣式（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/primary.png" alt="time-revamped: @time_revamped_primary 和 @time_revamped_primary_style 突出顯示一個時區"><br><sub><code>@time_revamped_primary</code> 和 <code>@time_revamped_primary_style</code> 突出顯示一個時區（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/reset.png" alt="time-revamped: @time_revamped_reset 是寫在每一項之後的樣式"><br><sub><code>@time_revamped_reset</code> 是寫在每一項之後的樣式（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/local.png" alt="time-revamped: #{time_local} 根據 TZ 命名地點"><br><sub><code>#{time_local}</code> 根據 <code>TZ</code> 命名地點（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/local-label.png" alt="time-revamped: @time_revamped_local_label 直接設定標籤"><br><sub><code>@time_revamped_local_label</code> 直接設定標籤（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/geoip.png" alt="time-revamped: @time_revamped_local_source 設為 geoip 時，查詢你 IP 所在的城市"><br><sub><code>@time_revamped_local_source</code> 設為 <code>geoip</code> 時，查詢你 IP 所在的城市（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/countdown.png" alt="time-revamped: #{time_until} 倒數到 @time_revamped_countdown_target"><br><sub><code>#{time_until}</code> 倒數到 <code>@time_revamped_countdown_target</code>（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/countdown-done.png" alt="time-revamped: 目標時間一過，就顯示 @time_revamped_countdown_done"><br><sub>目標時間一過，就顯示 <code>@time_revamped_countdown_done</code>（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/epoch.png" alt="time-revamped: Unix 時間、ISO 時間、偏移、週數和一年中的第幾天"><br><sub>Unix 時間、ISO 時間、偏移、週數和一年中的第幾天（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/dst.png" alt="time-revamped: #{time_dst} 在 @time_revamped_dst_zone 的時鐘調整前幾天發出提示"><br><sub><code>#{time_dst}</code> 在 <code>@time_revamped_dst_zone</code> 的時鐘調整前幾天發出提示（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/overlap.png" alt="time-revamped: #{time_overlap} 輸出所有時區共有的工作時段"><br><sub><code>#{time_overlap}</code> 輸出所有時區共有的工作時段（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/overlap-none.png" alt="time-revamped: @time_revamped_overlap_label 和 @time_revamped_overlap_none 決定顯示的措辭"><br><sub><code>@time_revamped_overlap_label</code> 和 <code>@time_revamped_overlap_none</code> 決定顯示的措辭（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/version.png" alt="time-revamped: 版本號"><br><sub>版本號（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/error.png" alt="time-revamped: 未知指令"><br><sub>未知指令（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/status-command.png" alt="time-revamped: status zones 和 status iso 各輸出一個佔位符"><br><sub><code>status zones</code> 和 <code>status iso</code> 各輸出一個佔位符（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/list.png" alt="time-revamped: list 列出所有綁定"><br><sub><code>list</code> 列出所有綁定（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/json.png" alt="time-revamped: list --json 把同一份計劃輸出為一個物件"><br><sub><code>list --json</code> 把同一份計劃輸出為一個物件（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/card.png" alt="time-revamped: card 輸出所有數值"><br><sub><code>card</code> 輸出所有數值（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/doctor.png" alt="time-revamped: doctor"><br><sub><code>doctor</code>（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/toggle-command.png" alt="time-revamped: toggle-format 切換至 12 小時制"><br><sub><code>toggle-format</code> 切換至 12 小時制（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/copy-command.png" alt="time-revamped: copy epoch 複製 Unix 時間"><br><sub><code>copy epoch</code> 複製 Unix 時間（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/mark-command.png" alt="time-revamped: mark 設定秒錶標記"><br><sub><code>mark</code> 設定秒錶標記（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/calendar-command.png" alt="time-revamped: calendar 開啟日曆"><br><sub><code>calendar</code> 開啟日曆（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/menu-command.png" alt="time-revamped: menu 開啟世界時鐘選單"><br><sub><code>menu</code> 開啟世界時鐘選單（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/menu-gum.png" alt="time-revamped: 選單"><br><sub>選單（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/menu-card.png" alt="time-revamped: 從選單開啟的卡片"><br><sub>從選單開啟的卡片（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/accent.png" alt="time-revamped: 來自 TIME_REVAMPED_ACCENT 的強調色"><br><sub>來自 <code>TIME_REVAMPED_ACCENT</code> 的強調色（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/plain-menu.png" alt="time-revamped: 沒有 gum 的選單"><br><sub>沒有 gum 的選單（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/plain-doctor.png" alt="time-revamped: 沒有 gum 時，從選單執行的 doctor"><br><sub>沒有 gum 時，從選單執行的 <code>doctor</code>（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/plain-card.png" alt="time-revamped: 沒有 gum 的 card"><br><sub>沒有 gum 的 <code>card</code>（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/themes.png" alt="time-revamped: 六個主題下的標題"><br><sub>六個主題下的標題（<code>themes.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/help.png" alt="time-revamped: 說明頁"><br><sub>說明頁（<code>help.tape</code>）</sub></td>
+<td width="50%"></td>
+</tr>
+</table>
+
+錄製運行真實的插件和 tmux。`date`、`cal`、`curl` 和 `pbcopy` 由小腳本代替，所以時鐘固定在 2026-10-16 星期五 14:30 UTC，以紐約時間顯示，並且不會碰剪貼簿。
+
+</details>
+
+## 可移植性
+
+本插件是 POSIX `sh`。CI 在下面每一行上執行全部測試套件。
+
+| Shell | 狀態 |
+|:------|:-------|
+| `dash`、macOS 上的 `/bin/sh` | 支援 |
+| `bash` 3.2 和 5.x、系統內置的 `zsh` 和 Homebrew 的 `zsh` | 支援 |
+
+| 系統 | 狀態 |
+|:-------|:-------|
+| macOS | Apple Silicon 和 Intel 上的 Tahoe，使用系統內置工具、Homebrew 的 GNU 工具和 Homebrew 的 uutils |
+| Linux | x86_64 和 arm64 上的 Ubuntu 26.04，使用 GNU coreutils、uutils 和 BusyBox |
 
 ## 開發
 
 | 指令 | 執行內容 |
 |:--------|:-------------|
-| `make test` | bats 測試套件 |
-| `make lint` | 對所有 shell 檔案執行 warning 級別的 shellcheck |
-| `make coverage` | kcov 行覆蓋率，下限 95%，只限 Linux |
+| `make fmt` | 對每個腳本執行 shfmt `-i 2` |
+| `make lint` | shfmt、ShellCheck、mandoc、yamllint 和 actionlint，零問題 |
+| `make test` | 在系統 `sh` 下執行 bats 測試套件 |
+| `make test-all` | 在每個已安裝的 shell 下執行測試套件，macOS 上包括兩種 bash 和 zsh |
+| `make test-linux` | 在 Ubuntu 容器中執行測試套件 |
+| `make coverage` | 在本機 Mac 和 Ubuntu 容器中執行 bashcov，合併後要求 100% |
+| `make screens` | 上面的截圖，在 macOS 上用 VHS 從真實插件在 tmux 內錄製 |
+| `make install` | 把指令、man 手冊和補全安裝到 `PREFIX` |
 
-在 macOS 上，執行 `brew bundle` 會根據 [`Brewfile`](Brewfile) 安裝這些目標用到的所有工具。
+在 macOS 上，`brew bundle` 會按 [`Brewfile`](Brewfile) 安裝這些目標用到的全部工具。
+
+提交遵循 Conventional Commits 格式，直接推送到 `main`。`main` 上的 `ci` 通過後，`release.yml` 執行 semantic-release：自上一個標籤以來的每個 `feat` 或 `fix` 都會發佈一個版本、寫入版本常數，並把說明加入 [`CHANGELOG.md`](CHANGELOG.md)。
 
 ## 授權
 

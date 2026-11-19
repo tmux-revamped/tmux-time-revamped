@@ -1,0 +1,18 @@
+$ time-revamped doctor
+tmux               ok       <path>, 3.8
+popup              ok       tmux 3.8 opens the calendar popup
+awk                ok       <path>, <flavor>
+sed                ok       <path>, <flavor>
+tr                 ok       <path>, <flavor>
+date               ok       <path>, <flavor>
+env                ok       <path>, <flavor>
+readlink           ok       <path>, <flavor>
+cal                ok       <path>, draws the calendar popup
+pbcopy             ok       <path>, copies a timestamp to the system clipboard
+curl               ok       <path>, asks geoip for the place label
+zoneinfo           ok       <path>, holds the zone names
+timezones          ok       1 configured, every one is in <path>
+settings           ok       every option holds a value it knows
+keys               ok       every key it binds is free or its own
+gum                ok       <path>
+exit 0

@@ -1,0 +1,15 @@
+$ time-revamped card
+Time           2026-10-16 23:30
+ISO            2026-10-16T23:30:00+09:00
+Epoch          1792161000
+Offset         UTC+09:00
+Week           42
+Day of year    289
+Local          Tokyo 23:30
+Zones          EDT 10:30 BST 15:30
+Countdown      30m
+Stopwatch      -
+Clock change   -
+Overlap        overlap 22:00-01:00
+Read. It is 2026-10-16T23:30:00+09:00.
+exit 0

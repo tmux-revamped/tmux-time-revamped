@@ -1,0 +1,152 @@
+$ time-revamped help
+time-revamped - local and world clocks in the status bar
+
+usage:
+  time-revamped apply          bind the keys and fill the placeholders
+  time-revamped list           print what apply would send to tmux
+  time-revamped status NAME    print one placeholder: datetime, date, clock,
+                               zones, local, until, elapsed, epoch, iso,
+                               offset, week, doy, dst or overlap
+  time-revamped card           print every figure as a table
+  time-revamped menu           open the world clock menu
+  time-revamped calendar       open the calendar in a tmux popup
+  time-revamped copy [KIND]    copy the time as iso or epoch to the tmux
+                               buffer and the system clipboard
+  time-revamped mark           set the stopwatch mark
+  time-revamped toggle-format  switch between 12 and 24 hour time
+  time-revamped daemon         publish the placeholders on every tick, for
+                               the options render mode
+  time-revamped doctor         check this machine
+  time-revamped version        print the version
+  time-revamped help           print this page
+
+keys:
+  --menu-key KEY              the prefix key for the menu, or off
+  --calendar-key KEY          the prefix key for the calendar, or off
+  --copy-key KEY              the prefix key that copies the ISO time, or off
+  --mark-key KEY              the prefix key that sets the mark, or off
+
+clock:
+  --date-format FORMAT        YMD, MD, DM, MDY, DMY or hide
+  --time-format FORMAT        24H, 12H or hide
+  --render MODE               jobs or options
+  --interval SECONDS          how often render mode publishes, or minute
+
+zones:
+  --timezones LIST            zone names separated by commas or spaces
+  --compact 0|1               1 prints short city labels
+  --zone-labels LIST          your own labels, matched by position
+  --zone-separator TEXT       text between the world clocks
+  --weekend-override 0|1      0 keeps the time of day colour on weekends
+  --local-label TEXT          a fixed label for the local clock
+  --local-source SOURCE       timezone or geoip
+  --geoip-endpoint URL        where geoip asks for the city
+  --geoip-interval MINUTES    minutes between geoip requests
+  --icon-position POSITION    middle or before
+  --reset STYLE               the style written after each entry
+  --relative-day 0|1          1 adds a +1d or -1d badge
+  --work-hours 0|1            1 dims a zone outside working hours
+  --work-start HOUR           the first working hour
+  --work-end HOUR             the hour working time ends
+  --dim-style STYLE           the style outside working hours, or none
+  --primary INDEX             the zero-based index of the zone to highlight
+  --primary-style STYLE       the style of that zone, or none
+
+periods:
+  --PERIOD-color STYLE        the colour of morning, day, afternoon, evening,
+                              night or weekend
+  --PERIOD-icon TEXT          the glyph of sunrise, morning, day, afternoon,
+                              sunset, evening, night or weekend
+
+countdown, dst and overlap:
+  --countdown-target WHEN     YYYY-MM-DD or YYYY-MM-DD HH:MM
+  --countdown-label TEXT      the text before the countdown
+  --countdown-done TEXT       the text once the target has passed
+  --dst-zone ZONE             the zone dst watches, default the local one
+  --dst-horizon DAYS          how many days ahead dst looks
+  --dst-label TEXT            the text before the day count
+  --overlap-label TEXT        the text before the overlap window
+  --overlap-none TEXT         the text when no hour is shared
+
+output:
+  --json                      list prints one JSON object
+  --theme NAME                the look: kodougu, catppuccin-mocha,
+                              catppuccin-latte, dracula, nord, gruvbox,
+                              tokyo-night or mono
+
+environment:
+  TIME_REVAMPED_<SETTING>  the same as the option of that name, such as
+                           TIME_REVAMPED_TIMEZONES for --timezones
+  TIME_REVAMPED_THEME      the look, when --theme is not given
+  TIME_REVAMPED_ACCENT     a colour such as #CBA6F7 for the accent
+  KODOUGU_THEME            the family look, when neither is given
+  KODOUGU_ACCENT           the family accent, when the tool's is unset
+  NO_COLOR                 turn colour off
+
+tmux options:
+  @time_revamped_menu_key          the menu key (default M-t)
+  @time_revamped_calendar_key      the calendar key (default off)
+  @time_revamped_copy_key          the copy key (default off)
+  @time_revamped_mark_key          the mark key (default off)
+  @time_revamped_date_format       YMD, MD, DM, MDY, DMY or hide
+                                   (default YMD)
+  @time_revamped_time_format       24H, 12H or hide (default 24H)
+  @time_revamped_timezones         the world clocks (default none)
+  @time_revamped_compact           0 or 1 (default 0)
+  @time_revamped_zone_labels       labels by position (default none)
+  @time_revamped_zone_separator    text between clocks (default a space)
+  @time_revamped_weekend_override  0 or 1 (default 1)
+  @time_revamped_local_label       label of #{time_local} (default none)
+  @time_revamped_local_source      timezone or geoip (default timezone)
+  @time_revamped_geoip_endpoint    the city lookup URL
+                                   (default https:<path>
+  @time_revamped_geoip_interval    minutes between lookups (default 30)
+  @time_revamped_<period>_color    style of morning, day, afternoon,
+                                   evening, night and weekend
+                                   (default yellow, green, cyan, magenta,
+                                   blue and brightblack)
+  @time_revamped_<period>_icon     glyph of sunrise, morning, day,
+                                   afternoon, sunset, evening, night and
+                                   weekend (default none)
+  @time_revamped_icon_position     middle or before (default middle)
+  @time_revamped_reset             style after each entry
+                                   (default #[default])
+  @time_revamped_relative_day      0 or 1 (default 0)
+  @time_revamped_work_hours        0 or 1 (default 0)
+  @time_revamped_work_start        first working hour (default 9)
+  @time_revamped_work_end          hour working time ends (default 17)
+  @time_revamped_dim_style         style outside working hours, or none
+                                   (default #[dim])
+  @time_revamped_primary           zero-based zone index (default none)
+  @time_revamped_primary_style     style of that zone, or none
+                                   (default #[bold])
+  @time_revamped_countdown_target  target of #{time_until} (default none)
+  @time_revamped_countdown_label   text before it (default none)
+  @time_revamped_countdown_done    text once it passed (default now)
+  @time_revamped_dst_zone          zone dst watches (default local)
+  @time_revamped_dst_horizon       days ahead (default 14)
+  @time_revamped_dst_label         text before the day count (default DST)
+  @time_revamped_overlap_label     text before the window
+                                   (default overlap)
+  @time_revamped_overlap_none      text with no shared hour
+                                   (default no overlap)
+  @time_revamped_render            jobs or options (default jobs)
+  @time_revamped_interval          seconds between publishes in render
+                                   mode, or minute (default minute)
+  @revamped_theme                  the family look (default kodougu)
+
+notes:
+  The placeholders are #{time} for datetime and #{time_<name>} for each
+  other name status takes. In jobs mode each runs the tool on every status
+  redraw and reads the clock once. With --render options each placeholder
+  reads a tmux option that a background process fills on every tick, by
+  default one second after the minute changes, so a status refresh starts
+  no process.
+  The stopwatch mark is kept in @time_revamped_mark_epoch.
+
+examples:
+  time-revamped status zones
+  time-revamped card
+  time-revamped --timezones "Asia<path>, Europe<path> status zones
+  time-revamped list --json
+exit 0

@@ -2,33 +2,94 @@
 
 # tmux-time-revamped
 
-<strong>ステータスバーにローカル時計と世界時計を時間帯ごとの色で表示し、カウントダウンと夏時間の警告も出します。</strong>
+<strong>tmux のステータスバーにローカル時計と世界時計を表示します。時間帯で色分けし、カウントダウンと夏時間の警告も出せます。</strong>
 
-[English](README.md) | 日本語 | [简体中文](README.zh-Hans.md) | [繁體中文（香港）](README.zh-HK.md)
+[English](README.md) &nbsp;|&nbsp; 日本語 &nbsp;|&nbsp; [简体中文](README.zh-Hans.md) &nbsp;|&nbsp; [繁體中文（香港）](README.zh-HK.md)
 
-[![family](https://img.shields.io/github/actions/workflow/status/tmux-revamped/tmux-time-revamped/family.yml?branch=main&style=flat-square&label=family)](https://github.com/tmux-revamped/tmux-time-revamped/actions/workflows/family.yml)
-[![tests](https://img.shields.io/github/actions/workflow/status/tmux-revamped/tmux-time-revamped/tests.yml?branch=main&style=flat-square&label=tests)](https://github.com/tmux-revamped/tmux-time-revamped/actions/workflows/tests.yml)
+[![ci](https://img.shields.io/github/actions/workflow/status/tmux-revamped/tmux-time-revamped/ci.yml?branch=main&style=flat-square&label=ci)](https://github.com/tmux-revamped/tmux-time-revamped/actions/workflows/ci.yml)
 [![release](https://img.shields.io/github/v/release/tmux-revamped/tmux-time-revamped?style=flat-square&label=release)](https://github.com/tmux-revamped/tmux-time-revamped/releases/latest)
 [![openssf scorecard](https://img.shields.io/ossf-scorecard/github.com/tmux-revamped/tmux-time-revamped?style=flat-square&label=openssf%20scorecard)](https://scorecard.dev/viewer/?uri=github.com/tmux-revamped/tmux-time-revamped)
 [![license](https://img.shields.io/github/license/tmux-revamped/tmux-time-revamped?style=flat-square&label=license)](LICENSE)
 
 <p align="center">
-  <a href="#機能">機能</a> |
-  <a href="#動作要件">動作要件</a> |
-  <a href="#インストール">インストール</a> |
-  <a href="#使い方">使い方</a> |
-  <a href="#設定">設定</a> |
-  <a href="#キーバインド">キーバインド</a> |
-  <a href="#仕組み">仕組み</a>
+  <a href="#クイックスタート"><strong>クイックスタート</strong></a> &nbsp;|&nbsp;
+  <a href="#使い方">使い方</a> &nbsp;|&nbsp;
+  <a href="#仕組み">仕組み</a> &nbsp;|&nbsp;
+  <a href="#画面">画面</a>
 </p>
 
 </div>
 
-ステータスのプレースホルダーが**14**個。操作が**4**つで、既定で割り当てるのはそのうち**1**つです。どの時計もシステムの`date`とタイムゾーンデータベースから求め、geoipを有効にしない限りネットワークには接続しません。
+<p align="center">
+  <img src="screens/hero.gif" alt="日付、時刻、時間帯で色分けした 3 つの世界時計を表示し、世界時計メニュー、12 時間表示、カレンダー、ストップウォッチ、options 描画モードを操作する time-revamped" width="800">
+</p>
+
+```console
+$ time-revamped --timezones "Europe/London, Asia/Tokyo" card
+Time           2026-11-19 13:02
+ISO            2026-11-19T13:02:54-05:00
+Epoch          1795111374
+Offset         UTC-05:00
+Week           47
+Day of year    323
+Local          New York 13:02
+Zones          GMT 18:02 JST 03:02
+Countdown      -
+Stopwatch      -
+Clock change   -
+Overlap        overlap no overlap
+Read. It is 2026-11-19T13:02:54-05:00.
+```
+
+プレースホルダー **14** 個、描画モード **2** つ、macOS と Linux、tmux **3.2** 以降。
 
 ---
 
-## 機能
+## クイックスタート
+
+### 前提条件
+
+| ツール | バージョン | 用途 |
+|:-----|:--------|:---------|
+| tmux | 3.2 以降 | ファミリーの下限、およびカレンダーのポップアップ |
+| `date` とタイムゾーンデータベース | システム | すべての時計。GNU、uutils、BusyBox、BSD の `date` に対応 |
+| `cal` | システム | カレンダーのポップアップ |
+| `curl` | 任意 | geoip の現在地ラベル |
+| `pbcopy`、`wl-copy`、`xclip` | 任意 | タイムスタンプをシステムのクリップボードへコピー |
+| gum | 任意 | `time-revamped` のメニュー、表、色。ない場合はすべてのコマンドがプレーンテキストを出力します |
+
+Linux と macOS で、BSD、GNU、uutils、BusyBox のツールとともに動作します。任意のツールがなければその機能は黙って無効になり、`time-revamped doctor` が名前を示します。
+
+### インストール
+
+[TPM](https://github.com/tmux-plugins/tpm) を使う場合は、プラグインを `~/.tmux.conf` に追加して `prefix + I` を押します。
+
+```tmux
+set -g @plugin 'tmux-revamped/tmux-time-revamped'
+set -g status-right '#{time} #{time_zones}'
+```
+
+手動でインストールする場合は、リポジトリをクローンして `~/.tmux.conf` からエントリーポイントを実行します。
+
+```bash
+git clone https://github.com/tmux-revamped/tmux-time-revamped ~/.tmux/plugins/tmux-time-revamped
+```
+
+```tmux
+run-shell ~/.tmux/plugins/tmux-time-revamped/time-revamped.tmux
+```
+
+プラグインを読み込む前に `status-left` か `status-right` を設定してください。プラグインは読み込み時に、そこにあるプレースホルダーを一度だけ置き換えます。
+
+クローンで `make install` を実行すると、`time-revamped` が `~/.local/bin` に、man ページと補完が `~/.local/share` に入ります。
+
+### 確認
+
+```bash
+~/.tmux/plugins/tmux-time-revamped/bin/time-revamped doctor
+```
+
+## 使い方
 
 このプラグインは、`status-left`と`status-right`のプレースホルダーを、ローカルの日付と時刻、任意の数の世界時計、開発やカレンダー向けのいくつかの項目に置き換えます。世界時計はそれぞれ現地の時刻に応じて色が付くので、誰が朝で誰が寝ている時間かが一目で分かります。
 
@@ -48,40 +109,6 @@
 | `#{time_doy}` | 年初からの通算日 |
 | `#{time_dst}` | 時刻の切り替えが期間内にあれば`DST in 3d` |
 | `#{time_overlap}` | 設定した全ゾーンに共通する勤務時間帯をローカル時刻で表示 |
-
-## 動作要件
-
-| ツール | バージョン | 用途 |
-|:-----|:--------|:---------|
-| tmux | 3.2以降 | カレンダーのポップアップが`display-popup`を使います |
-| bash | 3.2以降 | macOSの`/bin/bash`で動きます |
-| `date`とタイムゾーンデータベース | システム | すべての時計。GNUとBSDの`date`に対応します |
-| `cal` | システム | カレンダーのポップアップ |
-| `curl` | 任意 | geoipによる場所のラベル |
-| `pbcopy`、`wl-copy`、`xclip` | 任意 | タイムスタンプをシステムのクリップボードにコピー |
-
-CIは、Ubuntu LTSのx86_64とarm64でGNUとuutilsのcoreutilsを使い、macOSのApple SiliconとIntelでシステムのツール、GNUのツール、uutilsを使ってテストを実行します。
-
-## インストール
-
-[TPM](https://github.com/tmux-plugins/tpm)を使う場合は、プラグインとプレースホルダーを`~/.tmux.conf`に追加して`prefix + I`を押します。
-
-```tmux
-set -g @plugin 'tmux-revamped/tmux-time-revamped'
-set -g status-right '#{time}'
-```
-
-TPMを使わない場合は、リポジトリをクローンし、`status-right`を設定した後でエントリーポイントを実行します。
-
-```bash
-git clone https://github.com/tmux-revamped/tmux-time-revamped ~/.tmux/plugins/tmux-time-revamped
-```
-
-```tmux
-run-shell ~/.tmux/plugins/tmux-time-revamped/time-revamped.tmux
-```
-
-## 使い方
 
 ```tmux
 set -g @time_revamped_timezones 'America/New_York, Europe/London, Asia/Tokyo'
@@ -118,13 +145,32 @@ set -g status-right '#{time} #{time_zones}'
 
 ### レンダーモード
 
-既定では各プレースホルダーは`#()`呼び出しになり、tmuxはステータスを再描画するたびにそれを実行し直します。`@time_revamped_render`を`options`にすると、各プレースホルダーは`#{E:@time_revamped_out_local}`のようなオプションの読み取りになります。そしてサーバーごとに1つのバックグラウンドプロセスが、ステータスラインで使う時計をすべて、分が変わった1秒後に1分に1回描画し、1回のtmux呼び出しで書き込むので、時計がそろって変わります。
+既定では各プレースホルダーは`#()`呼び出しになり、tmuxはステータスを再描画するたびにそれを実行し直します。`@time_revamped_render`を`options`にすると、各プレースホルダーは`#{E:@time_revamped_out_local}`のようなオプションの読み取りになります。そしてサーバーごとに1つのバックグラウンドプロセスが、ステータスラインで使う時計をすべて、既定では分が変わった1秒後に1分に1回描画し、1回のtmux呼び出しで書き込むので、時計がそろって変わります。
 
 ```tmux
 set -g @time_revamped_render 'options'
 ```
 
+| コマンド | 内容 |
+|:--------|:-------------|
+| `time-revamped apply` | キーを割り当て、プレースホルダーを今すぐ置き換えます。エントリーポイントが tmux の読み込み時に実行します |
+| `time-revamped list` | `apply` が送るコマンドをすべて表示し、何も変更しません。`--json` で 1 つのオブジェクトを出力します |
+| `time-revamped status NAME` | `zones`、`iso`、`until` などプレースホルダーを 1 つ出力します。ステータスラインが実行します |
+| `time-revamped card` | 今すぐすべてを読み取り、数値ごとに 1 行を出力します |
+| `time-revamped menu` | 現在のクライアントに世界時計メニューを開きます |
+| `time-revamped calendar` | `cal` を tmux のポップアップで開き、キーが押されるまで表示します |
+| `time-revamped copy [KIND]` | 時刻を `iso` か `epoch` の形式で tmux のバッファーとシステムのクリップボードにコピーします |
+| `time-revamped mark` | `#{time_elapsed}` が数え始めるストップウォッチのマークを設定します |
+| `time-revamped toggle-format` | 12 時間表示と 24 時間表示を切り替えます |
+| `time-revamped daemon` | `options` 描画モード用に、プレースホルダーを 1 分に 1 回公開します。`apply` が起動します |
+| `time-revamped doctor` | 依存ごとに 1 行、設定したゾーン、設定、割り当てを見送ったキー |
+| `time-revamped version` | バージョン、続いて tmux のバージョン |
+| `time-revamped help` | ヘルプページ。`man time-revamped` が同じコマンドと設定を説明します |
+| `time-revamped` | ターミナルではメニュー |
+
 ## 設定
+
+すべてのオプションは、ダッシュ付きのコマンドオプション（例: `--timezones 'Asia/Tokyo'`）と、環境変数（例: `TIME_REVAMPED_TIMEZONES`）でも指定できます。優先順位はコマンドライン、環境変数、tmux オプションの順です。空の tmux オプションは既定値を意味します。`doctor` は、プラグインが知らない値を持つ設定を示します。`apply` に渡した設定は、すべてのキーとステータス呼び出しに引き継がれます。
 
 | オプション | 既定値 | 意味 |
 |:-------|:--------|:--------|
@@ -163,7 +209,7 @@ set -g @time_revamped_render 'options'
 | `@time_revamped_dst_label` | `DST` | 日数の前に付ける文字列 |
 | `@time_revamped_overlap_label` | `overlap` | 重なりの時間帯の前に付ける文字列 |
 | `@time_revamped_overlap_none` | `no overlap` | 共通の時間がないときの文字列 |
-| `@time_revamped_render` | 空 | `options`でレンダーモードを有効化 |
+| `@time_revamped_render` | `jobs` | `options`でレンダーモードを有効にします。それ以外の値は`jobs`として扱います |
 | `@time_revamped_interval` | `minute` | レンダーモードの間隔。`minute`か秒数。それ以外は`status-interval`、さらに5秒の順で代わりに使います |
 | `@time_revamped_menu_key` | `M-t` | 操作メニューを開くプレフィックスキー。`off`で割り当てなし |
 | `@time_revamped_calendar_key` | `off` | カレンダーのポップアップのプレフィックスキー |
@@ -177,11 +223,11 @@ set -g @time_revamped_render 'options'
 
 ```tmux
 # Catppuccin Mocha
-set -g @time_revamped_morning_color '#[fg=#f9e2af]'
-set -g @time_revamped_day_color '#[fg=#a6e3a1]'
-set -g @time_revamped_afternoon_color '#[fg=#94e2d5]'
-set -g @time_revamped_evening_color '#[fg=#cba6f7]'
-set -g @time_revamped_night_color '#[fg=#89b4fa]'
+set -g @time_revamped_morning_color '#[fg=#ff8700]'
+set -g @time_revamped_day_color '#[fg=#5fd700]'
+set -g @time_revamped_afternoon_color '#[fg=#00afff]'
+set -g @time_revamped_evening_color '#[fg=#ff5f87]'
+set -g @time_revamped_night_color '#[fg=#8787ff]'
 set -g @time_revamped_weekend_color '#[fg=#a6adc8]'
 
 # Dracula
@@ -237,45 +283,184 @@ set -g @time_revamped_weekend_color '#[fg=#586e75]'
 | `@time_revamped_published` | ステータスラインで使うプレースホルダー。レンダーモードがそれだけを公開するよう、読み込み時に記録します |
 | `@time_revamped_out_<name>` | レンダーモードで描画した各値 |
 | `@time_revamped_ticker_pid` | レンダーモードを担当するプロセス。再読み込みで新しいプロセスに引き継がれ、古いプロセスは終了します |
-| `@time_revamped_option_names` | レンダーモードが1回の処理ごとに1回のtmux呼び出しで読むオプション |
 | `@time_revamped_geoip_city` | geoipで得た最後の都市名。経過時間と実行中の要求を表す`_ts`と`_lock`が付随します |
 
 ## キーバインド
 
 | キー | オプション | 動作 |
 |:----|:-------|:-------|
-| `prefix + M-t` | `@time_revamped_menu_key` | 操作メニューを開く |
+| `prefix + M-t` | `@time_revamped_menu_key` | 世界時計メニューを開く |
 | 割り当てなし | `@time_revamped_calendar_key` | カレンダーのポップアップ |
-| 割り当てなし | `@time_revamped_copy_key` | ISOタイムスタンプをコピー |
+| 割り当てなし | `@time_revamped_copy_key` | ISO 形式の時刻をコピー |
 | 割り当てなし | `@time_revamped_mark_key` | ストップウォッチのマークを設定 |
 
-メニューには6つの項目があります。`h`は12時間表示と24時間表示を切り替え、`c`はカレンダーを開き、`i`と`e`は時刻をISO 8601かUNIX秒でtmuxのバッファーとシステムのクリップボードにコピーし、`m`はストップウォッチのマークを設定し、`d`は設定した各タイムゾーン名を`/usr/share/zoneinfo`と照合する診断を実行します。2.0.0より前のキーに戻すには、`@time_revamped_menu_key`を`T`にします。
+メニューには 6 つの項目があります。`h` は 12 時間表示と 24 時間表示を切り替え、`c` はカレンダーを開き、`i` と `e` は時刻を ISO 8601 か UNIX 秒で tmux のバッファーとシステムのクリップボードにコピーし、`m` はストップウォッチのマークを設定し、`d` は `time-revamped doctor` を実行します。既定のキーは、ほかの割り当てがすでにある場合は触れず、`doctor` がそれを示します。`off` にしたキーは何も割り当てません。
 
 ## 仕組み
 
-```mermaid
-graph LR
-    Entry[time-revamped.tmux] -->|書き換え| Status[status-left と status-right]
-    Status -->|既定モード| Call[src/time.sh のシェル呼び出し]
-    Status -->|レンダーモード| Option[オプションの読み取り]
-    Daemon[バックグラウンドプロセス] -->|1分に1回| Option
-    Call --> Date[date]
-    Daemon --> Date
-```
+[`time-revamped.tmux`](time-revamped.tmux) は tmux がプラグインを読み込むときに一度実行されます。`status-left` と `status-right` が使うプレースホルダーを `@time_revamped_published` に記録し、キーを割り当て、各プレースホルダーを [`bin/time-revamped`](bin/time-revamped) の呼び出しに、`options` モードではオプションの読み取りに置き換えて、バックグラウンドプロセスを起動します。
 
-[`time-revamped.tmux`](time-revamped.tmux)は読み込み時に、ステータスラインの各プレースホルダーを[`src/time.sh`](src/time.sh)の呼び出しか、レンダーモードではオプションの読み取りに置き換え、キーを割り当てます。時計の読み取りは`date`の1回の呼び出しなので、既定の`#()`モードでもすぐに返ります。レンダーモードでは、エントリーポイントがバックグラウンドプロセスを1つ起動します。このプロセスは`@time_revamped_ticker_pid`を取得し、処理のたびに公開対象の時計を描画し、別のプロセスがこのオプションを取得するかサーバーがなくなると終了します。
+既定のモードでは、各 `#()` 呼び出しが時計を 1 回読んで出力します。`options` モードでは、サーバーごとに 1 つのバックグラウンドプロセスが `@time_revamped_ticker_pid` を取得し、ステータスラインが使うプレースホルダーをすべて、既定では分が変わった 1 秒後に 1 分に 1 回描画して 1 回の tmux 呼び出しで書き込むので、時計がそろって変わります。別のプロセスがこのオプションを取得するかサーバーがなくなると終了します。
 
-夏時間と重なりの判定では、GNUでは`-d`、BSDでは`-r`を付けて`date`を実行し、その判別はプロセスごとに1回だけ行います。カウントダウン、ストップウォッチ、日付の差、重なりの時間帯はbashの整数演算です。
+`date` の呼び出しはすべて C ロケールで実行します。夏時間と重なりの判定では、GNU、uutils、BusyBox では `-d`、BSD では `-r` を付けて `date` を実行し、その判別はプロセスごとに 1 回だけ行います。カウントダウン、ストップウォッチ、日付の差はシェルの整数演算です。読み取り、数値、キーの割り当ては [`lib/time.sh`](lib/time.sh) に、設定の表は [`lib/state.sh`](lib/state.sh) にあります。
+
+<a id="画面"></a>
+
+## 画面
+
+<details>
+<summary>すべての画面。実際の tmux の中で <code>make screens</code> で録画し、押したキーをステータスラインに表示しています</summary>
+<br>
+
+<table>
+<tr>
+<td width="50%" valign="top"><img src="screens/status.png" alt="time-revamped: 日付、時刻、3 つの世界時計。時間帯ごとに色が変わります"><br><sub>日付、時刻、3 つの世界時計。時間帯ごとに色が変わります（<code>hero.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/menu.png" alt="time-revamped: prefix M-t で世界時計メニューを開きます"><br><sub><code>prefix M-t</code> で世界時計メニューを開きます（<code>hero.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/twelve.png" alt="time-revamped: メニューの h で 12 時間表示に切り替えます"><br><sub>メニューの <code>h</code> で 12 時間表示に切り替えます（<code>hero.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/calendar.png" alt="time-revamped: メニューの c でカレンダーを開きます"><br><sub>メニューの <code>c</code> でカレンダーを開きます（<code>hero.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/copy.png" alt="time-revamped: メニューの i で ISO 形式の時刻をコピーします"><br><sub>メニューの <code>i</code> で ISO 形式の時刻をコピーします（<code>hero.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/calendar-key.png" alt="time-revamped: @time_revamped_calendar_key でカレンダー専用のキーを割り当てます"><br><sub><code>@time_revamped_calendar_key</code> でカレンダー専用のキーを割り当てます（<code>hero.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/copy-key.png" alt="time-revamped: @time_revamped_copy_key で ISO コピー専用のキーを割り当てます"><br><sub><code>@time_revamped_copy_key</code> で ISO コピー専用のキーを割り当てます（<code>hero.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/mark-key.png" alt="time-revamped: @time_revamped_mark_key でストップウォッチのマークを設定します"><br><sub><code>@time_revamped_mark_key</code> でストップウォッチのマークを設定します（<code>hero.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/mark.png" alt="time-revamped: #{time_elapsed} はマークから数えます"><br><sub><code>#{time_elapsed}</code> はマークから数えます（<code>hero.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/options.png" alt="time-revamped: options 描画モードでは、各プレースホルダーが tmux オプションを読みます"><br><sub><code>options</code> 描画モードでは、各プレースホルダーが tmux オプションを読みます（<code>hero.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/formats.png" alt="time-revamped: @time_revamped_date_format と @time_revamped_time_format で日付と時刻の書式を変えます"><br><sub><code>@time_revamped_date_format</code> と <code>@time_revamped_time_format</code> で日付と時刻の書式を変えます（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/hide.png" alt="time-revamped: hide で #{time_date} と #{time_clock} の日付と時刻を消します"><br><sub><code>hide</code> で <code>#{time_date}</code> と <code>#{time_clock}</code> の日付と時刻を消します（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/compact.png" alt="time-revamped: @time_revamped_compact で短い都市名にします"><br><sub><code>@time_revamped_compact</code> で短い都市名にします（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/labels.png" alt="time-revamped: @time_revamped_zone_labels と @time_revamped_zone_separator で時計の名前と区切りを決めます"><br><sub><code>@time_revamped_zone_labels</code> と <code>@time_revamped_zone_separator</code> で時計の名前と区切りを決めます（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/periods.png" alt="time-revamped: 夜、朝、昼、午後、夕方にそれぞれ色があります"><br><sub>夜、朝、昼、午後、夕方にそれぞれ色があります（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/weekend.png" alt="time-revamped: 土曜と日曜は週末の色になります"><br><sub>土曜と日曜は週末の色になります（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/weekend-override.png" alt="time-revamped: @time_revamped_weekend_override を 0 にすると、週末も時間帯の色のままです"><br><sub><code>@time_revamped_weekend_override</code> を <code>0</code> にすると、週末も時間帯の色のままです（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/colors.png" alt="time-revamped: 時間帯の色には任意のスタイルを使えます。ここでは 16 進カラーです"><br><sub>時間帯の色には任意のスタイルを使えます。ここでは 16 進カラーです（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/icons.png" alt="time-revamped: 各時間帯にはアイコンのオプションがあります。ここでは 1 文字ずつです"><br><sub>各時間帯にはアイコンのオプションがあります。ここでは 1 文字ずつです（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/icon-position.png" alt="time-revamped: @time_revamped_icon_position を before にすると、アイコンが先頭に来ます"><br><sub><code>@time_revamped_icon_position</code> を <code>before</code> にすると、アイコンが先頭に来ます（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/relative-day.png" alt="time-revamped: @time_revamped_relative_day で、翌日のゾーンに +1d のバッジが付きます"><br><sub><code>@time_revamped_relative_day</code> で、翌日のゾーンに <code>+1d</code> のバッジが付きます（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/relative-day-back.png" alt="time-revamped: 前日のゾーンには同じバッジが -1d と表示されます"><br><sub>前日のゾーンには同じバッジが <code>-1d</code> と表示されます（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/work-hours.png" alt="time-revamped: @time_revamped_work_hours で、勤務時間外のゾーンが薄く表示されます"><br><sub><code>@time_revamped_work_hours</code> で、勤務時間外のゾーンが薄く表示されます（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/dim-style.png" alt="time-revamped: @time_revamped_work_start、@time_revamped_work_end、@time_revamped_dim_style で時間帯と薄く表示するスタイルを変えます"><br><sub><code>@time_revamped_work_start</code>、<code>@time_revamped_work_end</code>、<code>@time_revamped_dim_style</code> で時間帯と薄く表示するスタイルを変えます（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/primary.png" alt="time-revamped: @time_revamped_primary と @time_revamped_primary_style で 1 つのゾーンを強調します"><br><sub><code>@time_revamped_primary</code> と <code>@time_revamped_primary_style</code> で 1 つのゾーンを強調します（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/reset.png" alt="time-revamped: @time_revamped_reset は各項目の後ろに書くスタイルです"><br><sub><code>@time_revamped_reset</code> は各項目の後ろに書くスタイルです（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/local.png" alt="time-revamped: #{time_local} は TZ から場所の名前を付けます"><br><sub><code>#{time_local}</code> は <code>TZ</code> から場所の名前を付けます（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/local-label.png" alt="time-revamped: @time_revamped_local_label でラベルそのものを決めます"><br><sub><code>@time_revamped_local_label</code> でラベルそのものを決めます（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/geoip.png" alt="time-revamped: @time_revamped_local_source を geoip にすると、IP の都市を問い合わせます"><br><sub><code>@time_revamped_local_source</code> を <code>geoip</code> にすると、IP の都市を問い合わせます（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/countdown.png" alt="time-revamped: #{time_until} は @time_revamped_countdown_target までを数えます"><br><sub><code>#{time_until}</code> は <code>@time_revamped_countdown_target</code> までを数えます（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/countdown-done.png" alt="time-revamped: 目標を過ぎると @time_revamped_countdown_done を表示します"><br><sub>目標を過ぎると <code>@time_revamped_countdown_done</code> を表示します（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/epoch.png" alt="time-revamped: UNIX 時間、ISO 形式の時刻、オフセット、週番号、年内の通算日"><br><sub>UNIX 時間、ISO 形式の時刻、オフセット、週番号、年内の通算日（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/dst.png" alt="time-revamped: #{time_dst} は @time_revamped_dst_zone の時刻切り替えの数日前に警告します"><br><sub><code>#{time_dst}</code> は <code>@time_revamped_dst_zone</code> の時刻切り替えの数日前に警告します（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/overlap.png" alt="time-revamped: #{time_overlap} はすべてのゾーンが共有する勤務時間を表示します"><br><sub><code>#{time_overlap}</code> はすべてのゾーンが共有する勤務時間を表示します（<code>features.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/overlap-none.png" alt="time-revamped: @time_revamped_overlap_label と @time_revamped_overlap_none で表示の文言を決めます"><br><sub><code>@time_revamped_overlap_label</code> と <code>@time_revamped_overlap_none</code> で表示の文言を決めます（<code>features.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/version.png" alt="time-revamped: バージョン"><br><sub>バージョン（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/error.png" alt="time-revamped: 未知のコマンド"><br><sub>未知のコマンド（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/status-command.png" alt="time-revamped: status zones と status iso はそれぞれプレースホルダーを 1 つ出力します"><br><sub><code>status zones</code> と <code>status iso</code> はそれぞれプレースホルダーを 1 つ出力します（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/list.png" alt="time-revamped: list はすべての割り当てを出力します"><br><sub><code>list</code> はすべての割り当てを出力します（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/json.png" alt="time-revamped: list --json は同じ計画を 1 つのオブジェクトで出力します"><br><sub><code>list --json</code> は同じ計画を 1 つのオブジェクトで出力します（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/card.png" alt="time-revamped: card はすべての数値を出力します"><br><sub><code>card</code> はすべての数値を出力します（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/doctor.png" alt="time-revamped: doctor"><br><sub><code>doctor</code>（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/toggle-command.png" alt="time-revamped: toggle-format は 12 時間表示に切り替えます"><br><sub><code>toggle-format</code> は 12 時間表示に切り替えます（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/copy-command.png" alt="time-revamped: copy epoch は UNIX 時間をコピーします"><br><sub><code>copy epoch</code> は UNIX 時間をコピーします（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/mark-command.png" alt="time-revamped: mark はストップウォッチのマークを設定します"><br><sub><code>mark</code> はストップウォッチのマークを設定します（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/calendar-command.png" alt="time-revamped: calendar はカレンダーを開きます"><br><sub><code>calendar</code> はカレンダーを開きます（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/menu-command.png" alt="time-revamped: menu は世界時計メニューを開きます"><br><sub><code>menu</code> は世界時計メニューを開きます（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/menu-gum.png" alt="time-revamped: メニュー"><br><sub>メニュー（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/menu-card.png" alt="time-revamped: メニューから開いたカード"><br><sub>メニューから開いたカード（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/accent.png" alt="time-revamped: TIME_REVAMPED_ACCENT のアクセント色"><br><sub><code>TIME_REVAMPED_ACCENT</code> のアクセント色（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/plain-menu.png" alt="time-revamped: gum なしのメニュー"><br><sub>gum なしのメニュー（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/plain-doctor.png" alt="time-revamped: gum なしで、メニューから開いた doctor"><br><sub>gum なしで、メニューから開いた <code>doctor</code>（<code>stills.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/plain-card.png" alt="time-revamped: gum なしの card"><br><sub>gum なしの <code>card</code>（<code>stills.tape</code>）</sub></td>
+<td width="50%" valign="top"><img src="screens/themes.png" alt="time-revamped: 6 つのテーマのヘッダー"><br><sub>6 つのテーマのヘッダー（<code>themes.tape</code>）</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="screens/help.png" alt="time-revamped: ヘルプページ"><br><sub>ヘルプページ（<code>help.tape</code>）</sub></td>
+<td width="50%"></td>
+</tr>
+</table>
+
+録画では実際のプラグインと tmux を動かしています。`date`、`cal`、`curl`、`pbcopy` は小さなスクリプトで置き換えているため、時計は 2026-10-16 金曜 14:30 UTC に固定され、ニューヨークの時刻で表示され、クリップボードには触れません。
+
+</details>
+
+## 移植性
+
+このプラグインは POSIX `sh` です。CI は下の各行ですべてのスイートを実行します。
+
+| シェル | 状態 |
+|:------|:-------|
+| `dash`、macOS の `/bin/sh` | 対応 |
+| `bash` 3.2 と 5.x、システムの `zsh` と Homebrew の `zsh` | 対応 |
+
+| システム | 状態 |
+|:-------|:-------|
+| macOS | Apple Silicon と Intel の Tahoe。標準のツール、Homebrew の GNU ツール、Homebrew の uutils |
+| Linux | x86_64 と arm64 の Ubuntu 26.04。GNU coreutils、uutils、BusyBox |
 
 ## 開発
 
 | コマンド | 実行するもの |
 |:--------|:-------------|
-| `make test` | batsのテストスイート |
-| `make lint` | すべてのシェルファイルに対するwarningレベルのshellcheck |
-| `make coverage` | 下限95パーセントのkcovによる行カバレッジ、Linuxのみ |
+| `make fmt` | すべてのスクリプトに shfmt `-i 2` |
+| `make lint` | shfmt、ShellCheck、mandoc、yamllint、actionlint。指摘は 0 件 |
+| `make test` | システムの `sh` での bats スイート |
+| `make test-all` | インストール済みのすべてのシェルでのスイート。macOS では bash と zsh の両方のビルド |
+| `make test-linux` | Ubuntu コンテナでのスイート |
+| `make coverage` | この Mac と Ubuntu コンテナでの bashcov。統合して 100 パーセントを要求 |
+| `make screens` | 上の画面。実際のプラグインを tmux の中で VHS で録画（macOS） |
+| `make install` | コマンド、man ページ、補完を `PREFIX` の下にインストール |
 
 macOS では、`brew bundle` を実行すると、これらのターゲットが使うツールがすべて [`Brewfile`](Brewfile) からインストールされます。
+
+コミットは Conventional Commits の形式で、`main` に直接プッシュします。`main` で `ci` が成功すると、`release.yml` が semantic-release を実行します。前回のタグ以降の `feat` か `fix` ごとにリリースを公開し、バージョン定数を書き換え、ノートを [`CHANGELOG.md`](CHANGELOG.md) に追加します。
 
 ## ライセンス
 
